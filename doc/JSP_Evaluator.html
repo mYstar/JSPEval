@@ -1,0 +1,473 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Implementierung:JSP Evaluator</title>
+	<meta name='Generator' content='Zim 0.65'>
+	<style type='text/css'>
+		a          { text-decoration: none      }
+		a:hover    { text-decoration: underline }
+		a:active   { text-decoration: underline }
+		strike     { color: grey                }
+		u          { text-decoration: none;
+					 background-color: yellow   }
+		tt         { color: #2e3436;            }
+		pre        { color: #2e3436;
+					 margin-left: 20px          }
+		h1         { text-decoration: underline;
+					 color: #4e9a06; margin-bottom: 0 }
+		h2         { color: #4e9a06; margin-bottom: 0 }
+		h3         { color: #4e9a06; margin-bottom: 0 }
+		h4         { color: #4e9a06; margin-bottom: 0 }
+		h5         { color: #4e9a06; margin-bottom: 0 }
+		p          { margin-top: 0              }
+		span.zim-tag {
+			color: #ce5c00;
+		}
+		div.zim-object {
+			border-style:solid;
+			border-width:1px;
+		}
+		.checked-box {list-style-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAANOgAADMQBiN+4gQAAAAd0SU1FB9gKGQ8sMEGsKGkAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAEBUlEQVRIx62V22tdRRTGf7Nn73P2ybntnNOe3NqkPTGgLTVUUZF6QatSLOKTPgqCIqLgQ0H/A1sQQbBYCBb1QfAxiC8tSO1FqHkwJVKtjdTGNraUmObsc9nXmfGh7cGYpM1D5nHWzPetteZb3wg2eB2YqYm4zSadsMtoboiNBH/3TE0awx6j+MRoxoTg/IYRvP19TQrJS0bzhdHGSyKFkLTtjSKwMjyiEz43ynhtP6bdjBCWyFobAf7eT7VhNF/q1FRbjYjmUohlCVPwnB+6FUxMTJipqSmUUhhjEGKd3bMT4ks/Y6oLBK2Yth8hHYtCJXOix7Nf7xLMzc0xOzvLzp078TyPNE3viW3QJPXzhNWbxFFKHCmMhoLn/FHodd48vGfhapdAacXQlkFK5dL6wIUm6fuTZPuvqDQhaMUYYyiVyuQr6rXDexYuAdi3tSv1ZJNs/R/CaszzT+1na88uXFnCEnJVgivBNN8uTJKmHQI/ptOOcXNZzMz9mOqFs90OHpipWcYwlo5P4ebnuOkrvr5wgrH+h3im7y36MzuwRXYZeKha/OhP0EkadFoxQSdGSotedR/+XwMc2XvKdNUFOFqZx6LKZWIiwjgkikNmLp/hm8sH+K1zjFTHXfBYdTi+eJArzXM0GxFxoBDCopLvo/fqEwi1XPkWkGqjFo2TgB1jOYZUKZTS/D1/ncmLh7jon0IbRWoiTi59ymzzJEEQE3cStNZsGxqlfPE57MBbOR8fP3hDGalOO9fq2DlBvmZw8xa2IxACGn6TydlD/O6f5OzSV/zif0cYhLQaEXGkKBbz7Ov/AOlXV1cxgBJRI3fuSTrpTawt18kWIZN1CFuaONI0w0WOXfsI43YIggh/KUSlhqxrMz74AkOZcWBm9QkH+Gw8NDLuITi+m0yzhluSyJzBLcpblUhFxywSRAEtPwQjsKVN30CNh0uvYuOubSHLtN3J0TO1j0pmBNuFbFWRK0gyPRZpktL2I5JQkclKakNlnh54g6ocvevUr/Ai2a7wineEkcJupA3S1Wg0nVZM2E6wbEF5U5G9Q++wI7sfR7h3N8HVNstykBfzH+KJEZwiWD0aIwxCgJ0R1Mu7GXOeJSuK93bZtQIle4D9pUNU5DC5jEsu55AvZakM5NicGyEj8uuz8bUCQgj67QfY671P3vEoeC69gy695U1U7NG7XV0pUwBjDJa1/JJlWWxzHuflzQe5FJ/GsgUVuZ2t8lEkTvfc0aNHb72flBhjVicQQqCUuvM3/M+WDVguWBrMVdDXEGZlBVEUrVCU9d9s5+fnaTQa2PZyPxEIhJaI1EEoZwX4ncynp6fXrmB4eJjR0VFarRbNZnP9P9rt9gohqNVq1Ov1ZbF/AZGev3hLJ2/zAAAAAElFTkSuQmCC)}
+		.xchecked-box {list-style-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAANOgAADMQBiN+4gQAAAAd0SU1FB9gKGQ8bDYnDxEwAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAEK0lEQVRIx9WVS2hTWRjHf/eR3CY1nbxMH2YiZRQS6qO13YlMVxY3SnVcuNIBFezGpSADLoQqLu1sHJCqdCFSXFpw4YOCSH3BtFqttTNamabX3DS5bfO6uffMoglja3RGcDMHzuac7/z/53++//cd+L8P6VuCPQYZ8ADNgBd4J31DcDcQs+GnHByRocEDv0kfBSjAOlYCs11Q+gpwDegS8LMJ+3QIK0ATzEhV8Odnz5bzw8P4dJ25aJQ/WlvJ1df/K7hSLtOcTNI+Pk69rpMTgqIQhCDvh1/VSpw79+gRrRMTmLZNezLJJsPg+a5dmOEwQlFqg1sWG16/Jv7sGWXDwBACFQjC9HcwIMONKkGp4PGAJGEDS0IQmZlhnWnye3c3eiyGo6qr3WHbrJ+dJf7gAXI6zSIr72T7/fgzmT4FHnTBsgrQBfYvTU0km5vxz86iADnAm0rRPTWFt7cXZccOJJcLAGHb2K9ekT93jmwmwwdAAFpjI6Ntbfxw5879ag7l6o1sr5eHHR3IsRgeQK/M4sQE+YEB7JcvEY6zAj45SWFgAPPxYwzHoQxIkQjTPT0kIxE+Noj8sexFn4/xnh58iQTeSpHkHAdrbIzi0BCOrmNPTpK/eJHM3bt8sCyKQCiR4NWePWSiUZw1+ZLXJm4pFKLhzBlCsRh2RUXacVgeGaF47RrL58+zcP8+RrmMkCQinZ1EL1zAjERqmkH+tLYl1G3bCJw4QUjT0IA0MJfLMX/5MqmHD0nZNiUgtGULG/r7ccXjINWuWbnmqsuFu7sb/4EDNLlcBIEioNs2KUAFGmMxmk6dQm1tRZI+3xBqEkiShBQOox05Ql1nJ26gvuIUAWiKQnj/ftStW5Fk+YuF+NldsbBA4cYN9KdPmaso8Fc62ZJtk7l1C2t0FGdxESHE1xE4hkHh6lX0oSHSpRIewC/LrPf7CSgKNpCamkI/fZr8pUuIZBIcpyaBunahPp1mub+fDyMjGKUSChCsq6Nh717q9u2jbnSU0uAgRrFIwTThyhUCqRS+hgZKLS1fJvDm87SNjZGcnsYUAjcQ8vsJ9/Xh7u1FDgRQN20iks3iDA+zZFmYhQLqzZtsj8WY3L0baY2Sf55ICCKpFHUzM2SEQAJCHg+hY8fQDh5EDgRWDoRC1J88SePRo2geD0XAcBy8b98Sv3ePYDZbbf2rFQjLIphMsmDbaEBQVQkePox26BCSz7e6i4bDrDt+nGYhmBscpFAskheC4Js3bPR4qHphFYEnlcI7P4/jdqNpGu8TCe4oCsXr1z//F2ga3+/cSfTJE0qmSVYIsKzaOZDcbjKyzFIiwfvt21kMBLA07YsetzWNd+3tLLW0sH5igvT8PH9Go/z44kX+E4LGjg7GDYOcy4XlOEgLC//5P/5LCFzxOPLmzWyIx+m6fduu7v0NVGqyTSycKksAAAAASUVORK5CYII=)}
+		.unchecked-box {list-style-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAANOgAADMQBiN+4gQAAAAd0SU1FB9gKGQ8qAt8h3m8AAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAA60lEQVRIx+2VsQqDMBRF70sCLg5OLoKgjk7+lJ/hh+STXBwcnRz8ArMEkrxOFktbaC3tULzTg5e8k5vADXDq70VbobXmvu/hvQczg4heHrJfXxQFuq67blZbMc8zpmlCXddIkgTOuZcBUko45zCOI6y1Nz2xFSEEZFmGOI7fGg4A3nsQEZqmuXOu9jallACAtm3fvmutNaIoAjM/dkBECCF89KCbk4eAb+kEnIAT8EsAM0OIz3hSyrssUvss8t5fg+uIrLXPs0gIgWVZYIyBUurQyYdheO4gz3NUVQVjDNZ1PfSjpWmKsixvehfB9GBZ3NndrgAAAABJRU5ErkJggg==)}
+		ul {list-style-image: none}
+		/* ul rule needed to reset style for sub-bullets */
+	</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class='header'>
+	[ <span class='insen'>Prev</span> ]
+
+	[ <span class='insen'>Index</span> ]
+
+	[ <span class='insen'>Next</span> ]
+</div>
+
+<hr />
+
+<!-- Wiki content -->
+
+<div class='pages'>
+	<div class='heading'>
+	<h1>JSP Evaluator <a name='Implementierung:JSP Evaluator'></a></h1>
+	</div>
+
+	<div class='content'>
+	<p>
+Created Dienstag 31 Mai 2016
+</p>
+
+<h2>Problem:</h2>
+
+<p>
+<ul>
+<li>für die evolutionären Algorithmen soll eine Möglichkeit geschaffen werden, gefundene Lösungen in einheitlicher Weise auszuwerten (per Simulator)</li>
+<li>dazu ist ein einheitliches Modell nötig, das zusätzlich sehr praxisnah sein soll
+<ul>
+<li>geeignet dazu ist das <a href="#Stand der Technik:OP:shop problems:JSP" title="FJSP" class="page">FJSP</a></li>
+<li>weiterhin sollen mehrere Kriterien auswertbar sein (<b>makespan</b>, <b>Gesamtverspätung</b>, Anzahl der verspäteten Aufträge, <b>Lastverteilung auf den Maschinen</b>, Prozessplankosten, <b>Setupzeiten</b>, Maschinennutzung (idle time), <b>WIP</b>, <b>Durchlaufzeit</b>) die <b>fett markierten</b> sind obligatorisch</li>
+<li>zudem sind realitätsnahe Erweiterungen geplant/nötig:
+<ul>
+<li><b>Setupzeitkkjken</b></li>
+<li>Deadlines</li>
+<li>unterschiedliche Startzeiten der Jobs</li>
+</ul></li>
+</ul></li>
+</ul>
+</p>
+
+<br>
+<br>
+
+<h2>Lösung:</h2>
+
+<br>
+
+<h3>Repräsentation</h3>
+
+<p>
+<ul>
+<li>als Repräsentation der Maschinenzuordnung wird eine permutationsbasierte Codierung genutzt [gen2014multiobjective]
+<ul>
+<li>der <b>lokale Index</b> einer Operation entspricht dem Index im Array (locus)</li>
+<li>der <b>globale Index</b> entspricht der Tupeldarstellung (Jobindex, Operationindex) im Modell </li>
+</ul></li>
+</ul>
+<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image.png"><br>
+<ul style='padding-left: 30pt'>
+<li>die genutzte Maschine wird wie folgt berechnet: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation.png">
+<ul>
+<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation001.png"> ist der Wert des j-ten Gens</li>
+<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation002.png"> ist die Anzahl der verfügbaren Maschinen (dies schließt nur die für diese Operation erlaubten Maschinen ein)</li>
+</ul>
+</li>
+<li>FIX() rundet ab </li>
+</ul>
+<ul>
+<li>die Abarbeitungsreihenfolge wird random-key basiert aus dem Rest errechnet [bean1995random]
+<ul>
+<li>Rest: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation003.png"></li>
+<li>je höher der Rest, desto höher ist die Priorität des Jobs in der Warteschlange</li>
+<li>durch diese Prioritäten kann es passieren, dass eine spätere Operation <b>O2</b> eines Jobs eine höhere Priorität bekommt, als eine vorherige <b>O1</b>
+<ul>
+<li>dies führt durch die Abarbeitungsreihenfolge von Jobs zu einem Deadlock</li>
+<li>daher wird die Priorität von <b>O1 </b>angehoben (priority sharing)</li>
+</ul></li>
+</ul></li>
+</ul>
+</p>
+
+<br>
+
+<h3>Datenstrukturen</h3>
+
+<p>
+<ul>
+<li>folgende Datenstrukturen sind nötig um die Kriterien für eine Repräsentation eines Individuums zu berechnen:
+<ul>
+<li>Anzahl der verfügbaren Maschinen
+<ul>
+<li>Matrix der Abarbeitungsconstraints von Operationen auf Maschinen</li>
+</ul>
+</li>
+<li>durchschnittliche Abarbeitungszeiten der Operationen aller Jobs</li>
+<li>Setupzeiten Matrix</li>
+<li>Startzeiten der Jobs</li>
+<li>Deadlines für Jobs</li>
+</ul>
+</li>
+<li>alle Datenstrukturen werden in einem XML-File gespeichert und von dort eingelesen (<a href="file:///home/est/cloud/promotion/code/xml/model.xsd" title="XML Schema" class="file">XML Schema</a>, ein Beispielfile findet man: <a href="file:///home/est/cloud/promotion/code/JSPEval/xml/example.xml" title="hier" class="file">hier</a>)</li>
+</ul>
+</p>
+
+<p>
+<img src="file:///home/est/cloud/promotion/code/JSPEval/doc/xml_schema.svg" width="1000">
+</p>
+
+<br>
+
+<h3>Berechnung der Kriterien</h3>
+
+<br>
+
+<p>
+als Modell wird MILP-1 abgewandelt [defersha2010parallel]<br>
++ Setupzeiten<br>
++ Deadlines
+</p>
+
+<br>
+
+<h4>makespan</h4>
+
+<p>
+aus: [defersha2010parallel]<br>
+<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image006.png"><br>
+<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation018.png"><br>
+<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation017.png"><br>
+<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation014.png"><br>
+<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image007.png"><br>
+(3) wird verändert zu: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation013.png"><br>
+<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image008.png"><br>
+(1) alle Operationen sind <b>nur einer Maschine</b> zugeordnet<br>
+(2) nur wenn eine <b>Operation auf einer Maschine gescheduled</b> ist, gibt es eine Start- oder Fertigstellungszeit<br>
+(3) die <b>Fertigstellungszeit</b> einer Operation auf einer Maschine <b>ist die Startzeit + die Prozesszeit + Setupzeit</b>, wenn diese auf dieser Maschine gescheduled ist<br>
+(4) die <b>Startzeit</b> einer Operation auf einer <b>Maschine ist größer als die Fertigstellung</b> der <b>vorhergehenden</b> Operation auf der gleichen Maschine<br>
+(5) sagt das gleiche wie (4)<br>
+(6) die Startzeit ist kleinergleich der <b>Fertigstellung der vorhergehenden Operationen</b> (gleich für die direkt vorhergehende)<br>
+(7) Die <b>Fertigstellungzzeit eines Jobs</b> ist die <b>späteste</b> Fertigstellung einer <b>Operation</b> dieses Jobs<br>
+(8) die <b>makespan</b> ist die späteste Fertigstellung eines Jobs 
+</p>
+
+<br>
+
+<h4>Gesamtverspätung (total tardiness)</h4>
+
+<br>
+
+<p>
+<ul>
+<li>jeder Job besizt eine Deadline: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation008.png"></li>
+<li>wenn Fertigstellungzeit <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation005.png"> größer ist als <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation008.png">, dann ist deren Differenz die Verspätung <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation009.png"> (delay), sonst ist die Verspätung 0
+<ul>
+<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation006.png"></li>
+</ul>
+</li>
+<li>Gesamtverspätung: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation007.png"></li>
+</ul>
+</p>
+
+<br>
+
+<h4>Lastverteilung (load balance)</h4>
+
+<br>
+
+<p>
+<ul>
+<li>die Last(load) auf einer Maschine ist der Quotient aus der Produktivzeit einer Maschine und der Gesamtsimulationszeit
+<ul>
+<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation010.png"></li>
+</ul>
+</li>
+<li>die Lastverteilung <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation012.png"> wird dann aus der Standardabweichung aller <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation011.png"> berechnet</li>
+</ul>
+</p>
+
+<br>
+
+<h4>Setupzeit</h4>
+
+<br>
+
+<p>
+<ul>
+<li>die Summe aller genutzten Setupzeiten
+<ul>
+<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation015.png"></li>
+</ul></li>
+</ul>
+</p>
+
+<br>
+
+<h4>WIP</h4>
+
+<br>
+
+<p>
+<ul>
+<li>die maximal gleichzeitig in der Produktion befindliche Anzahl an Produktionsmitteln</li>
+<li>dazu ist für jeden Job eine Anzahl Produktionsmittel <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation016.png"> hinterlegt</li>
+<li>nun ist zu folgenden Zeitpunkten der WIP <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation019.png"> zum Zeitpunkt t wie folgt definiert
+<ul>
+<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation020.png"></li>
+<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation021.png"></li>
+<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation022.png"></li>
+</ul>
+</li>
+<li>damit ist der WIP: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation023.png"></li>
+</ul>
+</p>
+
+<br>
+
+<h4>Durchlaufzeit</h4>
+
+<br>
+
+<p>
+<ul>
+<li>die Durchlaufzeit(passtime) <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation024.png"> wird durch die maximale Zeit, die ein Job während der Simulation in der Produktion verweilt, gemessen</li>
+<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation025.png"></li>
+</ul>
+</p>
+
+	</div>
+
+	<br />
+
+	<div class='page-footer'>
+		<b>Backlinks:</b>
+
+		<a href='#Implementierung'>Implementierung</a>
+
+		<br /><br />
+
+			<b>Attachments:</b>
+			<table>
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation.png'>equation.png</a></td><td>&nbsp;</td><td>673b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation.tex'>equation.tex</a></td><td>&nbsp;</td><td>28b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation001.png'>equation001.png</a></td><td>&nbsp;</td><td>235b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation001.tex'>equation001.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation002.png'>equation002.png</a></td><td>&nbsp;</td><td>294b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation002.tex'>equation002.tex</a></td><td>&nbsp;</td><td>4b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation003.png'>equation003.png</a></td><td>&nbsp;</td><td>530b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation003.tex'>equation003.tex</a></td><td>&nbsp;</td><td>28b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation004.png'>equation004.png</a></td><td>&nbsp;</td><td>266b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation004.tex'>equation004.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation005.png'>equation005.png</a></td><td>&nbsp;</td><td>259b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation005.tex'>equation005.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation006.png'>equation006.png</a></td><td>&nbsp;</td><td>1.25kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation006.tex'>equation006.tex</a></td><td>&nbsp;</td><td>88b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation007.png'>equation007.png</a></td><td>&nbsp;</td><td>581b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation007.tex'>equation007.tex</a></td><td>&nbsp;</td><td>22b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation008.png'>equation008.png</a></td><td>&nbsp;</td><td>284b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation008.tex'>equation008.tex</a></td><td>&nbsp;</td><td>11b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation009.png'>equation009.png</a></td><td>&nbsp;</td><td>266b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation009.tex'>equation009.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation010.png'>equation010.png</a></td><td>&nbsp;</td><td>1.15kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation010.tex'>equation010.tex</a></td><td>&nbsp;</td><td>83b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation011.png'>equation011.png</a></td><td>&nbsp;</td><td>258b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation011.tex'>equation011.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation012.png'>equation012.png</a></td><td>&nbsp;</td><td>215b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation012.tex'>equation012.tex</a></td><td>&nbsp;</td><td>1b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation013.png'>equation013.png</a></td><td>&nbsp;</td><td>1.98kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation013.tex'>equation013.tex</a></td><td>&nbsp;</td><td>154b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation014.png'>equation014.png</a></td><td>&nbsp;</td><td>1.74kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation014.tex'>equation014.tex</a></td><td>&nbsp;</td><td>128b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation015.png'>equation015.png</a></td><td>&nbsp;</td><td>1.20kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation015.tex'>equation015.tex</a></td><td>&nbsp;</td><td>68b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation016.png'>equation016.png</a></td><td>&nbsp;</td><td>264b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation016.tex'>equation016.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation017.png'>equation017.png</a></td><td>&nbsp;</td><td>735b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation017.tex'>equation017.tex</a></td><td>&nbsp;</td><td>47b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation018.png'>equation018.png</a></td><td>&nbsp;</td><td>953b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation018.tex'>equation018.tex</a></td><td>&nbsp;</td><td>54b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation019.png'>equation019.png</a></td><td>&nbsp;</td><td>286b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation019.tex'>equation019.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation020.png'>equation020.png</a></td><td>&nbsp;</td><td>357b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation020.tex'>equation020.tex</a></td><td>&nbsp;</td><td>7b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation021.png'>equation021.png</a></td><td>&nbsp;</td><td>1.21kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation021.tex'>equation021.tex</a></td><td>&nbsp;</td><td>83b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation022.png'>equation022.png</a></td><td>&nbsp;</td><td>1.55kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation022.tex'>equation022.tex</a></td><td>&nbsp;</td><td>105b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation023.png'>equation023.png</a></td><td>&nbsp;</td><td>545b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation023.tex'>equation023.tex</a></td><td>&nbsp;</td><td>13b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation024.png'>equation024.png</a></td><td>&nbsp;</td><td>234b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation024.tex'>equation024.tex</a></td><td>&nbsp;</td><td>1b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation025.png'>equation025.png</a></td><td>&nbsp;</td><td>1.01kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation025.tex'>equation025.tex</a></td><td>&nbsp;</td><td>61b</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image.png'>pasted_image.png</a></td><td>&nbsp;</td><td>11.6kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image001.png'>pasted_image001.png</a></td><td>&nbsp;</td><td>68.7kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image002.png'>pasted_image002.png</a></td><td>&nbsp;</td><td>40.5kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image003.png'>pasted_image003.png</a></td><td>&nbsp;</td><td>74.3kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image004.png'>pasted_image004.png</a></td><td>&nbsp;</td><td>72.9kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image005.png'>pasted_image005.png</a></td><td>&nbsp;</td><td>27.9kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image006.png'>pasted_image006.png</a></td><td>&nbsp;</td><td>91.3kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image007.png'>pasted_image007.png</a></td><td>&nbsp;</td><td>19.5kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image008.png'>pasted_image008.png</a></td><td>&nbsp;</td><td>52.2kb</td></tr>
+
+			</table>
+	</div>
+
+	
+
+</div>
+
+</body>
+</html>
