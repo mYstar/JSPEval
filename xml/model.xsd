@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.htw-dresden.de/JSPeval"
+  xmlns="http://www.htw-dresden.de/JSPeval"
+  elementFormDefault="qualified">
+
+  <!-- definition of simple datatypes -->
+
+  <!-- a deadline is defined as the number of timeunits since the start of the
+  production when the production of a job shall be ready -->
+  <xs:simpleType name="t_deadline">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0.0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- production_units are a number of resources that are used in the
+  production of a job. These are used as measurement units for WIP calculation.
+  -->
+  <xs:simpleType name="t_production_units">
+    <xs:restriction base="xs:integer">
+      <xs:minInclusive value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- a starttime is defined as the number of timeunits since the start of the
+  production when the job can start processing-->
+  <xs:simpleType name="t_starttime">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0.0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- the duration is defined as the number of timeunits an operation needs
+  from start to finish -->
+  <xs:simpleType name="t_duration">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0.0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- a setuptime is composed of 2 operations and a duration a machine needs to
+  switch from prosessing the one operation to the other -->
+  <xs:complexType name="t_setuptime">
+    <xs:sequence>
+      <xs:element name="from_operation" type="xs:string"/>
+      <xs:element name="to_operation" type="xs:string"/>
+      <xs:element name="setup_duration" type="t_duration"/>
+    </xs:sequence>
+
+  </xs:complexType>
+
+  <!-- definition of complex types -->
+
+  <xs:element name="machine">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        A machine is identified by an ID. It can process a different set of
+        operations, but this is defined at the operation.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:attribute name="machine_id" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:key name="machineid">
+      <xs:selector xpath="machine"/>    
+      <xs:field xpath="@machine_id"/>
+    </xs:key>
+  </xs:element>
+
+  <xs:element name="operation">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        An operation has a defined duration and can be processed by a list of
+        machines. The ID of the operation has to be unique.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="op_duration" type="t_duration"/>
+        <xs:element name="allowed_machine" type="xs:string" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="operation_id" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:key name="operationid">
+      <xs:selector xpath="operation"/>    
+      <xs:field xpath="@operation_id"/>
+    </xs:key>
+    <xs:keyref name="allowedmachines" refer="machineid">
+      <xs:selector xpath="operation"/>
+      <xs:field xpath="allowed_machine"/>
+    </xs:keyref>
+  </xs:element>
+
+  <xs:element name="job">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        Jobs consist of operations and have a deadline.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="starttime" type="t_starttime"/>
+        <xs:element name="deadline" type="t_deadline"/>
+        <xs:element name="production_units" type="t_production_units"/>
+        <xs:element ref="operation" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="job_id" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:key name="jobid">
+      <xs:selector xpath="job"/>    
+      <xs:field xpath="@job_id"/>
+    </xs:key>
+    <xs:keyref name="joboperation" refer="operationid">
+      <xs:selector xpath="job"/>
+      <xs:field xpath="operation"/>
+    </xs:keyref>
+  </xs:element>
+
+  <xs:element name="setuptimes">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        There must be a setuptime for every operation to every other. undefined setuptimes will be asumed as 0.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:sequence> 
+        <xs:element name="setuptime" type="t_setuptime" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+
+    <xs:unique name="fromtopair">
+      <xs:selector xpath="setuptime"/>
+      <xs:field xpath="from_operation"/>
+      <xs:field xpath="to_operation"/>
+    </xs:unique>
+    <xs:keyref name="fromoperation" refer="operationid">
+      <xs:selector xpath="setuptime"/>
+      <xs:field xpath="from_operation"/>
+    </xs:keyref>
+    <xs:keyref name="tooperatioan" refer="operationid">
+      <xs:selector xpath="setuptime"/>
+      <xs:field xpath="to_operation"/>
+    </xs:keyref>
+  </xs:element>
+
+  <xs:element name="jsp-model">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        A model contains all information required for instanciation (jobs, machines, setuptimes).
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="machine" maxOccurs="unbounded"/>
+        <xs:element ref="job" maxOccurs="unbounded"/>
+        <xs:element ref="setuptimes"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
