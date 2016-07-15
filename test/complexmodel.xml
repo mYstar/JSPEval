@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp-model 
+  xmlns="http://www.htw-dresden.de/JSPeval"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.htw-dresden.de/JSPeval file:///home/est/cloud/promotion/code/JSPEval/xml/model.xsd">
+
+  <!-- definition of the machine ids-->
+  <machine machine_id="m0"/>
+  <machine machine_id="m1"/>
+  <machine machine_id="m2"/>
+  <machine machine_id="m3"/>
+
+  <!-- listing of all jobs and their operations. All times are relative to the
+  model start. starttime is the earliest time the job can begin processing.
+  deadline is the planned time when the job shall be ready operations have a
+  duration and a list of allowed machines for processing -->
+  <job job_id="j0">
+    <starttime>0.0</starttime>
+    <deadline>30.0</deadline>
+    <production_units>2</production_units>
+    <operation operation_id="o00">
+      <op_duration>7.0</op_duration>
+      <allowed_machine>m0</allowed_machine>
+      <allowed_machine>m2</allowed_machine>
+    </operation>
+    <operation operation_id="o01">
+      <op_duration>12.0</op_duration>
+      <allowed_machine>m1</allowed_machine>
+      <allowed_machine>m3</allowed_machine>
+    </operation>
+  </job>
+  
+  <job job_id="j1">
+    <starttime>15.0</starttime>
+    <deadline>150.0</deadline>
+    <production_units>1</production_units>
+    <operation operation_id="o10">
+      <op_duration>15.0</op_duration>
+      <allowed_machine>m0</allowed_machine>
+      <allowed_machine>m1</allowed_machine>
+      <allowed_machine>m3</allowed_machine>
+    </operation>
+    <operation operation_id="o11">
+      <op_duration>25.0</op_duration>
+      <allowed_machine>m0</allowed_machine>
+      <allowed_machine>m2</allowed_machine>
+    </operation>
+    <operation operation_id="o12">
+      <op_duration>10.0</op_duration>
+      <allowed_machine>m0</allowed_machine>
+      <allowed_machine>m2</allowed_machine>
+      <allowed_machine>m3</allowed_machine>
+    </operation>
+    <operation operation_id="o13">
+      <op_duration>5.0</op_duration>
+      <allowed_machine>m0</allowed_machine>
+      <allowed_machine>m2</allowed_machine>
+      <allowed_machine>m3</allowed_machine>
+    </operation>
+    <operation operation_id="o14">
+      <op_duration>50.0</op_duration>
+      <allowed_machine>m1</allowed_machine>
+      <allowed_machine>m2</allowed_machine>
+      <allowed_machine>m3</allowed_machine>
+    </operation>
+  </job>
+
+  <job job_id="j2">
+    <starttime>30.0</starttime>
+    <deadline>100.0</deadline>
+    <production_units>5</production_units>
+    <operation operation_id="o20">
+      <op_duration>15.0</op_duration>
+      <allowed_machine>m0</allowed_machine>
+      <allowed_machine>m1</allowed_machine>
+      <allowed_machine>m2</allowed_machine>
+      <allowed_machine>m3</allowed_machine>
+    </operation>
+    <operation operation_id="o21">
+      <op_duration>2.0</op_duration>
+      <allowed_machine>m2</allowed_machine>
+    </operation>
+    <operation operation_id="o22">
+      <op_duration>13.0</op_duration>
+      <allowed_machine>m1</allowed_machine>
+      <allowed_machine>m2</allowed_machine>
+      <allowed_machine>m3</allowed_machine>
+    </operation>
+  </job>
+
+  <job job_id="j3">
+    <starttime>50.0</starttime>
+    <deadline>65.0</deadline>
+    <production_units>4</production_units>
+    <operation operation_id="o30">
+      <op_duration>5.0</op_duration>
+      <allowed_machine>m0</allowed_machine>
+      <allowed_machine>m1</allowed_machine>
+      <allowed_machine>m2</allowed_machine>
+      <allowed_machine>m3</allowed_machine>
+    </operation>
+  </job>
+
+  <job job_id="j4">
+    <starttime>5.0</starttime>
+    <deadline>80.0</deadline>
+    <production_units>2</production_units>
+    <operation operation_id="o40">
+      <op_duration>30.0</op_duration>
+      <allowed_machine>m3</allowed_machine>
+    </operation>
+  </job>
+
+  <!-- list of the setuptimes, non existing pairs will be assumed as 0.0
+  setuptime-->
+  <setuptimes>
+    <setuptime>
+      <from_operation>o00</from_operation>
+      <to_operation>o21</to_operation>
+      <setup_duration>2.0</setup_duration>      
+    </setuptime>
+    <setuptime>
+      <from_operation>o11</from_operation>
+      <to_operation>o12</to_operation>
+      <setup_duration>1.5</setup_duration>      
+    </setuptime>
+    <setuptime>
+      <from_operation>o40</from_operation>
+      <to_operation>o01</to_operation>
+      <setup_duration>5.5</setup_duration>      
+    </setuptime>
+    <setuptime>
+      <from_operation>o13</from_operation>
+      <to_operation>o11</to_operation>
+      <setup_duration>2.5</setup_duration>      
+    </setuptime>
+  </setuptimes>
+</jsp-model>

@@ -39,6 +39,13 @@ def model_10operations(request):
     return JspModel(request.param)
 
 
+@pytest.fixture(scope="module",
+                params=["test/complexmodel.xml"])
+def model_complex(request):
+    # read the model and build objects from it
+    return JspModel(request.param)
+
+
 @pytest.fixture
 def rand_solution(model):
     return model.get_random_solution()

@@ -1,4 +1,3 @@
-import copy
 import numpy
 
 
@@ -21,14 +20,15 @@ class JspEvaluator:
 
     def build_machine_assignment(self, solution):
         """
-        This function assigns operations to machines according to a solution.
-        The solution can be provided by an optimization-algorithm.
+        This function assigns operations to machines according to a solution   .
+        and calculates their priorities. A solution can be provided by an     .
+        optimization-algorithm                                               .
 
         solution: a solution for this model, that determines the machines and
         the priorities
 
-        returns: a list containing for every machine the list of operations (as
-        job, operation tuple) in the order of processing
+        returns: a dictionary for every operation containing its determined
+        machine and priority. Like: (job, op): (machine, prio)
         """
         if(self.model.solution_length() != len(solution)):
             raise ValueError("the solution does not fit the model (",
@@ -37,37 +37,13 @@ class JspEvaluator:
                              len(solution), " solution length)")
 
         # create a dictionary of the operations and their priority per machine
-        assignment = [{} for i in range(len(self.model.machine))]
+        assignment = {}
         for index in range(len(solution)):
             machine_idx = solution.get_machine_assignment(index)
             global_idx = self.model.translate_global_index(index)
             priority = solution.get_priority(index)
-            assignment[machine_idx][global_idx] = priority
+            assignment[global_idx] = (machine_idx, priority)
 
-        # priority sharing
-        for machine_dict in assignment:
-            for sol1 in machine_dict:
-                for sol2 in machine_dict:
-                    if(sol1 == sol2):
-                        continue
-
-                    job1 = sol1[0]
-                    job2 = sol2[0]
-
-                    if(job1 == job2):
-                        op1 = sol1[1]
-                        op2 = sol2[1]
-                        prio1 = machine_dict[sol1]
-                        prio2 = machine_dict[sol2]
-
-                        # if the precedence of the operations is not correct
-                        if(op1 < op2 and prio1 < prio2):
-                            machine_dict[sol1] = prio2
-
-        # sort all machine's assignments
-        assignment = [sorted(machine_ass,
-                             key=lambda sol: (-machine_ass[sol], sol[1]))
-                      for machine_ass in assignment]
         return assignment
 
     def execute_schedule(self, solution):
@@ -81,67 +57,78 @@ class JspEvaluator:
         operation in the model
 
         returns:
-            1. a list with the machine assignments (which is a list of
-            operations for every machine)
+            1. a list with the machine assignments (which is a dict of all
+            operations with containing a tuple (machine, priority) for every
+            one)
             2. a dictionary with every operation and its corresponding
             finishtime and the used setuptime as a tuple like: (setup, finish)
         """
         assignment = self.build_machine_assignment(solution)
-        ret_assignment = copy.deepcopy(assignment)
 
         schedule = {}
         # stores the finishing time of the last operation for every machine
-        machinetime = [0.0 for i in range(len(assignment))]
+        machinetime = [0.0 for i in range(len(self.model.machine))]
         # stores the last processed operation for every machine
-        last_op = [None for i in range(len(assignment))]
+        last_op = [None for i in range(len(self.model.machine))]
+        # init the dict of available operations + their machines and priorities
+        avail_op = {}
+        for i in range(len(self.model.job)):
+            avail_op[(i, 0)] = assignment[(i, 0)]
 
+        # calculate execution of all operations in order
         for i in range(self.model.solution_length()):
-            for machine in range(len(assignment)):
-                # skip machines with empty queues
-                if(len(assignment[machine]) == 0):
-                    continue
+            # get the available operation with the highest priority
+            op_index = max(avail_op.keys(), key=lambda x: avail_op[x][1])
+            job = self.model.job[op_index[0]]
+            operation = job.operation[op_index[1]]
+            machine = avail_op[op_index][0]
 
-                op_index = assignment[machine][0]
-                # execute job only if the predecessor in the job is already
-                # calculated or its the first operation in the job
-                if(op_index[1] == 0 or
-                   (op_index[0], op_index[1]-1) in schedule):
+            # the first operation's starttime is the job's starttime
+            if(op_index[1] == 0):
+                starttime = job.starttime
+            else:
+                # all other operations can start when their predecessors
+                # are done
+                starttime = \
+                    schedule[(op_index[0], op_index[1]-1)][1]
 
-                    assignment[machine].pop(0)
-                    job = self.model.job[op_index[0]]
-                    operation = job.operation[op_index[1]]
+            # calculate the setuptime
+            setuptime = self.model.get_setuptime(
+                last_op[machine],
+                op_index)
 
-                    # the first operation's starttime is the job's starttime
-                    if(op_index[1] == 0):
-                        starttime = job.starttime
-                    else:
-                        # all other operations can start when their predecessors
-                        # are done
-                        starttime = \
-                            schedule[(op_index[0], op_index[1]-1)][1]
+            # calculate the time the operation is finished
+            if machinetime[machine] + setuptime > starttime:
+                start = machinetime[machine] + setuptime
+            else:
+                start = starttime
+                # readjust hidden setuptime (done in idle time)
+                setuptime = 0.0
+            finish_time = start + operation.op_duration
 
-                    # calculate the setuptime
-                    setuptime = self.model.get_setuptime(
-                        last_op[machine],
-                        op_index)
+            schedule[op_index] = (setuptime, finish_time)
 
-                    # calculate the time the operation is finished
-                    finish_time =\
-                        max(machinetime[machine], starttime) +\
-                        operation.op_duration + setuptime
+            # cleanup
+            machinetime[machine] = finish_time
+            last_op[machine] = op_index
+            del avail_op[(op_index[0], op_index[1])]
+            # insert next operation into available list, if this was not the
+            # last
+            if(op_index[1] < len(self.model.job[op_index[0]].operation) - 1):
+                avail_op[(op_index[0], op_index[1]+1)] =\
+                    assignment[(op_index[0], op_index[1]+1)]
 
-                    schedule[op_index] = (setuptime, finish_time)
-                    machinetime[machine] = finish_time
-                    last_op[machine] = op_index
-                    break
-
-        return ret_assignment, schedule
+        return assignment, schedule
 
     def get_metrics(self, assignment, schedule):
         """
         Calculates the following metrics:
             * makespan
             * total tardiness
+            * load balance
+            * setup time
+            * max wip
+            * max passtime
 
         assignment:     the machine assignment for the operations
         schedule:       The calculated schedule for a solution.
@@ -165,12 +152,12 @@ class JspEvaluator:
                 total_tardiness += t_ready - deadline
 
         # sum all production times for every machine
-        m_prod_times = []
-        for mach_id in range(len(assignment)):
-            sum_prod = 0.0
-            for op in assignment[mach_id]:
-                sum_prod += self.model.job[op[0]].operation[op[1]].op_duration
-            m_prod_times.append(sum_prod/makespan)
+        m_prod_times = [0.0 for idx in range(len(self.model.machine))]
+        for op, assign in assignment.iteritems():
+            m_prod_times[assign[0]] +=\
+                self.model.job[op[0]].operation[op[1]].op_duration
+        for idx in range(len(m_prod_times)):
+            m_prod_times[idx] = m_prod_times[idx]/makespan
         # calculate the standard deviation
         loadbalance = numpy.std(m_prod_times)
 

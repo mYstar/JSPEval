@@ -8,15 +8,8 @@ from jspeval import JspEvaluator
 def test_machine_assignment_everything_assigned(evaluator, rand_solution):
     assignment = evaluator.build_machine_assignment(rand_solution)
 
-    # have a list for every machine
-    assert len(assignment) == 3
-
-    # make sure the correct number of operations have been assigned
-    ops = 0
-    for mlist in assignment:
-        ops += len(mlist)
-
-    assert ops == 4
+    # have values for every operation
+    assert len(assignment) == 4
 
 
 @pytest.mark.parametrize("array", [
@@ -31,122 +24,136 @@ def test_machine_assignment_dont_accept_unfitting_solutions(
     JspSolution(evaluator.model, array)
 
 
-@pytest.mark.parametrize("machine_index, op_index, expected", [
-    (0, 0, (1, 1)),
-    (0, 1, (0, 0)),
-    (1, 0, (1, 0)),
-    (2, 0, (0, 1)),
-    pytest.mark.xfail(raises=IndexError)((3, 0, None)),
-    pytest.mark.xfail(raises=IndexError)((0, 2, None)),
-    pytest.mark.xfail(raises=IndexError)((1, 1, None)),
-    pytest.mark.xfail(raises=IndexError)((2, 1, None)),
+@pytest.mark.parametrize("operation, expected", [
+    ((0, 0), (0, 0.0)),
+    ((0, 1), (2, 0.5)),
+    ((1, 0), (1, 0.5)),
+    ((1, 1), (0, 0.5)),
 ])
 @pytest.mark.usefixtures("evaluator", "simple_solution")
 def test_machine_assignment_model_simple_solution(
     evaluator,
     simple_solution,
-    machine_index,
-    op_index,
+    operation,
     expected
 ):
     assignment = evaluator.build_machine_assignment(simple_solution)
-    assert assignment[machine_index][op_index] == expected
+    assert assignment[operation] == expected
 
 
-@pytest.mark.parametrize("machine_index, op_index, expected", [
-    (0, 0, (0, 0)),
-    (0, 1, (0, 1)),
-    (0, 2, (0, 2)),
-    (1, 0, (1, 0)),
-    (1, 1, (1, 1)),
-    (2, 0, (2, 0)),
-    (2, 1, (1, 2)),
-    (2, 2, (1, 3)),
-    (3, 0, (2, 1)),
-    (3, 1, (2, 2)),
-    pytest.mark.xfail(raises=IndexError)((4, 0, None)),
-    pytest.mark.xfail(raises=IndexError)((0, 3, None)),
-    pytest.mark.xfail(raises=IndexError)((1, 2, None)),
-    pytest.mark.xfail(raises=IndexError)((2, 3, None)),
-    pytest.mark.xfail(raises=IndexError)((3, 2, None)),
+@pytest.mark.parametrize("operation, expected", [
+    ((0, 0), (0, 0.0)),
+    ((0, 1), (0, 0.4)),
+    ((0, 2), (0, 0.8)),
+    ((1, 0), (1, 0.2)),
+    ((1, 1), (1, 0.6)),
+    ((1, 2), (2, 0.0)),
+    ((1, 3), (2, 0.4)),
+    ((2, 0), (2, 0.8)),
+    ((2, 1), (3, 0.2)),
+    ((2, 2), (3, 0.6)),
 ])
 @pytest.mark.usefixtures("model_10operations",
                          "simple_solution_10operations")
 def test_machine_assignment_model10operations_simple_solution(
     model_10operations,
     simple_solution_10operations,
-    machine_index,
-    op_index,
+    operation,
     expected
 ):
     evaluator = JspEvaluator(model_10operations)
     assignment = evaluator.build_machine_assignment(
         simple_solution_10operations)
-    assert assignment[machine_index][op_index] == expected
+    assert assignment[operation][0] == expected[0]
+    assert conftest.isclose(assignment[operation][1], expected[1])
 
 
-@pytest.mark.parametrize("machine_index, op_index, expected", [
-    (1, 0, (0, 0)),
-    (1, 1, (1, 0)),
-    (2, 0, (1, 1)),
-    (2, 1, (0, 1)),
-    pytest.mark.xfail(raises=IndexError)((3, 0, None)),
-    pytest.mark.xfail(raises=IndexError)((0, 0, None)),
-    pytest.mark.xfail(raises=IndexError)((1, 2, None)),
-    pytest.mark.xfail(raises=IndexError)((2, 2, None)),
+@pytest.mark.parametrize("operation, expected", [
+    ((0, 0), (1, 0.58)),
+    ((0, 1), (2, 0.46)),
+    ((1, 0), (1, 0.55)),
+    ((1, 1), (2, 0.66)),
 ])
 @pytest.mark.usefixtures("evaluator")
 def test_machine_assignment_model_special_solution(
     evaluator,
-    machine_index,
-    op_index,
+    operation,
     expected
 ):
     special_sol = JspSolution(evaluator.model,
                               [0.7868123262784397, 0.22609036724935294,
                                0.5564064121714216, 0.33262085267764774])
     assignment = evaluator.build_machine_assignment(special_sol)
-    assert assignment[machine_index][op_index] == expected
+    assert assignment[operation][0] == expected[0]
+    assert conftest.isclose(
+        assignment[operation][1], expected[1],
+        abs_tol=0.0099)
 
 
-@pytest.mark.parametrize("machine_index, op_index, expected", [
-    (0, 0, (2, 1)),
-    (0, 1, (1, 1)),
-    (1, 0, (1, 2)),
-    (1, 1, (1, 3)),
-    (1, 2, (0, 0)),
-    (1, 3, (0, 1)),
-    (2, 0, (0, 2)),
-    (2, 1, (2, 0)),
-    (2, 2, (2, 2)),
-    (3, 0, (1, 0)),
-    pytest.mark.xfail(raises=IndexError)((4, 0, None)),
-    pytest.mark.xfail(raises=IndexError)((0, 2, None)),
-    pytest.mark.xfail(raises=IndexError)((1, 4, None)),
-    pytest.mark.xfail(raises=IndexError)((2, 3, None)),
-    pytest.mark.xfail(raises=IndexError)((3, 1, None)),
+@pytest.mark.parametrize("operation, expected", [
+    ((0, 0), (2, 0.24)),
+    ((0, 1), (3, 0.24)),
+    ((0, 2), (2, 0.92)),
+    ((1, 0), (3, 0.72)),
+    ((1, 1), (3, 0.84)),
+    ((1, 2), (0, 0.36)),
+    ((1, 3), (2, 0.60)),
+    ((2, 0), (1, 0.80)),
+    ((2, 1), (3, 0.08)),
+    ((2, 2), (3, 0.16)),
 ])
 @pytest.mark.usefixtures("model_10operations")
 def test_machine_assignment_model10operations_special_solution(
     model_10operations,
-    machine_index,
-    op_index,
+    operation,
     expected
 ):
     evaluator = JspEvaluator(model_10operations)
     special_sol = JspSolution(evaluator.model,
-                              [0.26289654, 0.37875545, 0.65186909, 0.87012503,
-                               0.12016336, 0.43416026, 0.46744025, 0.5454204,
-                               0.1569579, 0.61702519])
+                              [0.56, 0.81, 0.73, 0.93, 0.96, 0.09,
+                               0.65, 0.45, 0.77, 0.79])
     assignment = evaluator.build_machine_assignment(special_sol)
-    assert assignment[machine_index][op_index] == expected
+    assert assignment[operation][0] == expected[0]
+    assert conftest.isclose(
+        assignment[operation][1], expected[1],
+        abs_tol=0.0099)
+
+
+@pytest.mark.parametrize("operation, expected", [
+    ((0, 0), (2, 0.86)),
+    ((0, 1), (3, 0.42)),
+    ((1, 0), (0, 0.99)),
+    ((1, 1), (0, 0.34)),
+    ((1, 2), (0, 0.21)),
+    ((1, 3), (2, 0.47)),
+    ((1, 4), (2, 0.92)),
+    ((2, 0), (1, 0.92)),
+    ((2, 1), (2, 0.33)),
+    ((2, 2), (3, 0.16)),
+    ((3, 0), (2, 0.08)),
+    ((4, 0), (3, 0.47))
+])
+def test_machine_assignment_complexmodel_special_solution(
+    model_complex,
+    operation,
+    expected
+):
+    evaluator = JspEvaluator(model_complex)
+    special_sol = JspSolution(evaluator.model,
+                              [0.93, 0.71, 0.33, 0.17, 0.07, 0.49, 0.64, 0.48,
+                               0.33, 0.72, 0.52, 0.47])
+    assignment = evaluator.build_machine_assignment(special_sol)
+    assert assignment[operation][0] == expected[0]
+    assert conftest.isclose(
+        assignment[operation][1], expected[1],
+        abs_tol=0.0099)
 
 
 @pytest.mark.usefixtures("evaluator", "simple_solution")
 def test_execute_schedule_right_output_len(evaluator, simple_solution):
     assignment, schedule = evaluator.execute_schedule(simple_solution)
     assert len(schedule) == 4
-    assert len(assignment) == 3
+    assert len(assignment) == 4
 
 
 @pytest.mark.parametrize("operation, expected", [
@@ -206,16 +213,16 @@ def test_execute_schedule_simple_solution_10_operations(
 
 
 @pytest.mark.parametrize("operation, expected", [
-    ((0, 0), (0.0, 5.0)),
-    ((0, 1), (0.0, 65.0)),
-    ((0, 2), (0.0, 70.0)),
+    ((0, 0), (0.0, 70.0)),
+    ((0, 1), (0.0, 85.0)),
+    ((0, 2), (0.0, 90.0)),
     ((1, 0), (0.0, 25.0)),
     ((1, 1), (0.0, 50.0)),
     ((1, 2), (0.0, 60.0)),
-    ((1, 3), (0.0, 75.0)),
+    ((1, 3), (0.0, 65.0)),
     ((2, 0), (0.0, 35.0)),
-    ((2, 1), (0.0, 70.0)),
-    ((2, 2), (0.0, 80.0)),
+    ((2, 1), (0.0, 90.0)),
+    ((2, 2), (0.0, 100.0)),
 ])
 @pytest.mark.usefixtures("model_10operations", "simple_solution_10operations")
 def test_execute_schedule_special_solution_10_operations(
@@ -225,11 +232,35 @@ def test_execute_schedule_special_solution_10_operations(
 ):
     evaluator = JspEvaluator(model_10operations)
     solution = JspSolution(model_10operations,
-                           [0.5572241803936271, 0.8146056708861297,
-                            0.7334878579497098, 0.9348902571852687,
-                            0.9630020818043674, 0.09038641982878015,
-                            0.6450835364231192, 0.4521901964567513,
-                            0.7731538645471703, 0.7904693381618841])
+                           [0.56, 0.81, 0.73, 0.93, 0.96, 0.09,
+                            0.65, 0.45, 0.77, 0.79])
+    _, schedule = evaluator.execute_schedule(solution)
+    assert schedule[operation] == expected
+
+
+@pytest.mark.parametrize("operation, expected", [
+    ((0, 0), (0.0, 7.0)),
+    ((0, 1), (5.5, 52.5)),
+    ((1, 0), (0.0, 30.0)),
+    ((1, 1), (0.0, 55.0)),
+    ((1, 2), (1.5, 66.5)),
+    ((1, 3), (0.0, 71.5)),
+    ((1, 4), (0.0, 121.5)),
+    ((2, 0), (0.0, 45.0)),
+    ((2, 1), (0.0, 47.0)),
+    ((2, 2), (0.0, 65.5)),
+    ((3, 0), (0.0, 126.5)),
+    ((4, 0), (0.0, 35.0)),
+])
+def test_execute_schedule_special_solution_complex(
+    model_complex,
+    operation,
+    expected
+):
+    evaluator = JspEvaluator(model_complex)
+    solution = JspSolution(model_complex,
+                           [0.93, 0.71, 0.33, 0.17, 0.07, 0.49, 0.64, 0.48,
+                            0.33, 0.72, 0.52, 0.47])
     _, schedule = evaluator.execute_schedule(solution)
     assert schedule[operation] == expected
 
@@ -287,18 +318,15 @@ def test_calculate_metrics_10operations_special_solution(
 ):
     evaluator = JspEvaluator(model_10operations)
     solution = JspSolution(model_10operations,
-                           [0.5572241803936271, 0.8146056708861297,
-                            0.7334878579497098, 0.9348902571852687,
-                            0.9630020818043674, 0.09038641982878015,
-                            0.6450835364231192, 0.4521901964567513,
-                            0.7731538645471703, 0.7904693381618841])
+                           [0.56, 0.81, 0.73, 0.93, 0.96, 0.09,
+                            0.65, 0.45, 0.77, 0.79])
     assignment, schedule = evaluator.execute_schedule(solution)
     metrics = evaluator.get_metrics(assignment, schedule)
-    assert metrics["makespan"] == 80.0
+    assert metrics["makespan"] == 100.0
     assert metrics["setup time"] == 0.0
-    assert metrics["max wip"] == 6
-    assert metrics["max passtime"] == 70.0
-    assert metrics["total tardiness"] == 75.0
+    assert metrics["max wip"] == 5
+    assert metrics["max passtime"] == 80.0
+    assert metrics["total tardiness"] == 115.0
     assert conftest.isclose(
             metrics["load balance"],
-            0.30777680630612825)
+            0.24622144504490259)
