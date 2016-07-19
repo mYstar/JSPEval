@@ -167,9 +167,9 @@ class JspEvaluator:
         # calculate the WIP and passtime
         # create a list of all job start- and endtimes and their effects on the
         # WIP
-        # use the start- and endtimes to calculate the passtime for the job
+        # use the start- and endtimes to calculate the flow factor for the job
         wip_changes = {}
-        max_passtime = 0
+        flowfactors = []
         for job_id in range(len(self.model.job)):
             last_op = len(self.model.job[job_id].operation) - 1
             jobstart = schedule[(job_id, 0)][1] -\
@@ -179,11 +179,13 @@ class JspEvaluator:
             wip_changes[jobstart] = production_units
             wip_changes[jobend] = -production_units
 
-            # calculate the max passtime
-            duration = jobend - jobstart
-            if(max_passtime < duration):
-                max_passtime = duration
+            # calculate the raw processtime for the job
+            ptime = sum([op.op_duration
+                         for op in self.model.job[job_id].operation])
+            # store the passtimes
+            flowfactors.append((jobend - jobstart) / ptime)
 
+        # go through the wip changes in order and record the max occuring WIP
         max_wip = 0
         curr_wip = 0
         for _, change in sorted(wip_changes.iteritems()):
@@ -195,5 +197,5 @@ class JspEvaluator:
                 "setup time": setuptime,
                 "load balance": loadbalance,
                 "max wip": max_wip,
-                "max passtime": max_passtime,
+                "avg flowfactor": numpy.average(flowfactors),
                 "total tardiness": total_tardiness}

@@ -271,7 +271,7 @@ def test_calculate_metrics_example_simple_solution(evaluator, simple_solution):
     assert metrics["makespan"] == 60.0
     assert metrics["setup time"] == 0.0
     assert metrics["max wip"] == 1
-    assert metrics["max passtime"] == 30.0
+    assert conftest.isclose(metrics["avg flowfactor"], 1.0)
     assert metrics["total tardiness"] == 35.0
     assert conftest.isclose(
             metrics["load balance"],
@@ -287,7 +287,7 @@ def test_calculate_metrics_example_special_solution(evaluator):
     assert metrics["makespan"] == 57.5
     assert metrics["setup time"] == 2.5
     assert metrics["max wip"] == 2
-    assert metrics["max passtime"] == 57.5
+    assert conftest.isclose(metrics["avg flowfactor"], 1.9375)
     assert metrics["total tardiness"] == 32.5
     assert conftest.isclose(
             metrics["load balance"],
@@ -305,7 +305,7 @@ def test_calculate_metrics_10operations_simple_solution(
     assert metrics["makespan"] == 65.0
     assert metrics["setup time"] == 0.0
     assert metrics["max wip"] == 6
-    assert metrics["max passtime"] == 55.0
+    assert conftest.isclose(metrics["avg flowfactor"], 1.0)
     assert metrics["total tardiness"] == 0.0
     assert conftest.isclose(
             metrics["load balance"],
@@ -325,8 +325,28 @@ def test_calculate_metrics_10operations_special_solution(
     assert metrics["makespan"] == 100.0
     assert metrics["setup time"] == 0.0
     assert metrics["max wip"] == 5
-    assert metrics["max passtime"] == 80.0
+    assert conftest.isclose(metrics["avg flowfactor"],
+                            1.55555556,
+                            abs_tol=0.000001)
     assert metrics["total tardiness"] == 115.0
     assert conftest.isclose(
             metrics["load balance"],
             0.24622144504490259)
+
+def test_calculate_metrics_complex_solution(
+    model_complex
+):
+    evaluator = JspEvaluator(model_complex)
+    solution = JspSolution(model_complex,
+                           [0.93, 0.71, 0.33, 0.17, 0.07, 0.49, 0.64, 0.48,
+                            0.33, 0.72, 0.52, 0.47])
+    assignment, schedule = evaluator.execute_schedule(solution)
+    metrics = evaluator.get_metrics(assignment, schedule)
+    assert metrics["makespan"] == 126.5
+    assert metrics["setup time"] == 7.0
+    assert metrics["max wip"] == 10
+    assert conftest.isclose(metrics["avg flowfactor"], 1.3921553884711779)
+    assert metrics["total tardiness"] == 84.0
+    assert conftest.isclose(
+            metrics["load balance"],
+            0.15714880181131291)

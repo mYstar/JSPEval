@@ -47,9 +47,9 @@ wip:
 | 100.0 | !2  | 0   |
 | max   |     | 5   |
 
-passtimes:
-| job | passtime |
-| 0   | 25.0     |
-| 1   | 55.0     |
-| 2   | 80.0     |
-| max | 80.0     |
+flowfactor:
+| job | passtime | processtime | flowfactor |
+| 0   | 25.0     | 25.0        | 1.0        |
+| 1   | 55.0     | 55.0        | 1.0        |
+| 2   | 80.0     | 30.0        | 2.666667   |
+| avg |          |             | 1.555556   |
