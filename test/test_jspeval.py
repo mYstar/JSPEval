@@ -2,6 +2,7 @@ import conftest
 import pytest
 from jspsolution import JspSolution
 from jspeval import JspEvaluator
+from jspmodel import JspModel
 
 
 @pytest.mark.usefixtures("evaluator", "rand_solution")
@@ -313,8 +314,7 @@ def test_calculate_metrics_10operations_simple_solution(
 
 
 def test_calculate_metrics_10operations_special_solution(
-    model_10operations,
-    simple_solution_10operations
+        model_10operations
 ):
     evaluator = JspEvaluator(model_10operations)
     solution = JspSolution(model_10operations,
@@ -329,12 +329,11 @@ def test_calculate_metrics_10operations_special_solution(
                             1.55555556,
                             abs_tol=0.000001)
     assert metrics["total tardiness"] == 115.0
-    assert conftest.isclose(
-            metrics["load balance"],
-            0.24622144504490259)
+    assert conftest.isclose(metrics["load balance"], 0.24622144504490259)
+
 
 def test_calculate_metrics_complex_solution(
-    model_complex
+        model_complex
 ):
     evaluator = JspEvaluator(model_complex)
     solution = JspSolution(model_complex,
@@ -347,6 +346,13 @@ def test_calculate_metrics_complex_solution(
     assert metrics["max wip"] == 10
     assert conftest.isclose(metrics["avg flowfactor"], 1.3921553884711779)
     assert metrics["total tardiness"] == 84.0
-    assert conftest.isclose(
-            metrics["load balance"],
-            0.15714880181131291)
+    assert conftest.isclose(metrics["load balance"], 0.15714880181131291)
+
+
+def test_calculate_partial_setuptime():
+    model = JspModel("test/partial_setuptime.xml")
+    evaluator = JspEvaluator(model)
+    solution = JspSolution(model, [0.99, 0.99, 0.0])
+
+    _, schedule = evaluator.execute_schedule(solution)
+    assert schedule[(1, 1)][0] == 2.0

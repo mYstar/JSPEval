@@ -84,7 +84,7 @@ class JspEvaluator:
             machine = avail_op[op_index][0]
 
             # the first operation's starttime is the job's starttime
-            if(op_index[1] == 0):
+            if op_index[1] == 0:
                 starttime = job.starttime
             else:
                 # all other operations can start when their predecessors
@@ -100,6 +100,9 @@ class JspEvaluator:
             # calculate the time the operation is finished
             if machinetime[machine] + setuptime > starttime:
                 start = machinetime[machine] + setuptime
+                # calculate partial setuptimes if necessary
+                if starttime > machinetime[machine]:
+                    setuptime -= starttime - machinetime[machine]
             else:
                 start = starttime
                 # readjust hidden setuptime (done in idle time)
@@ -114,7 +117,7 @@ class JspEvaluator:
             del avail_op[(op_index[0], op_index[1])]
             # insert next operation into available list, if this was not the
             # last
-            if(op_index[1] < len(self.model.job[op_index[0]].operation) - 1):
+            if op_index[1] < len(self.model.job[op_index[0]].operation) - 1:
                 avail_op[(op_index[0], op_index[1]+1)] =\
                     assignment[(op_index[0], op_index[1]+1)]
 
@@ -188,7 +191,7 @@ class JspEvaluator:
         # go through the wip changes in order and record the max occuring WIP
         max_wip = 0
         curr_wip = 0
-        for _, change in sorted(wip_changes.iteritems()):
+        for _, change in sorted(wip_changes.items()):
             curr_wip += change
             if curr_wip > max_wip:
                 max_wip = curr_wip

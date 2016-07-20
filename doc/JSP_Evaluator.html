@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<title>Implementierung:JSP Evaluator</title>
+	<title>JSP Evaluator</title>
 	<meta name='Generator' content='Zim 0.65'>
 	<style type='text/css'>
 		a          { text-decoration: none      }
@@ -67,11 +67,11 @@ Created Dienstag 31 Mai 2016
 <li>für die evolutionären Algorithmen soll eine Möglichkeit geschaffen werden, gefundene Lösungen in einheitlicher Weise auszuwerten (per Simulator)</li>
 <li>dazu ist ein einheitliches Modell nötig, das zusätzlich sehr praxisnah sein soll
 <ul>
-<li>geeignet dazu ist das <a href="#Stand der Technik:OP:shop problems:JSP" title="FJSP" class="page">FJSP</a></li>
-<li>weiterhin sollen mehrere Kriterien auswertbar sein (<b>makespan</b>, <b>Gesamtverspätung</b>, Anzahl der verspäteten Aufträge, <b>Lastverteilung auf den Maschinen</b>, Prozessplankosten, <b>Setupzeiten</b>, Maschinennutzung (idle time), <b>WIP</b>, <b>Durchlaufzeit</b>) die <b>fett markierten</b> sind obligatorisch</li>
+<li>geeignet dazu ist das <a href="" title="FJSP" class="page">FJSP</a></li>
+<li>weiterhin sollen mehrere Kriterien auswertbar sein (<b>makespan</b>, <b>Gesamtverspätung</b>, Anzahl der verspäteten Aufträge, <b>Lastverteilung auf den Maschinen</b>, Prozessplankosten, <b>Setupzeiten</b>, Maschinennutzung (idle time), <b>WIP</b>, <b>Flussfaktor</b>, Durchlaufzeit) die <b>fett markierten</b> sind obligatorisch</li>
 <li>zudem sind realitätsnahe Erweiterungen geplant/nötig:
 <ul>
-<li><b>Setupzeitkkjken</b></li>
+<li><b>Setupzeiten</b></li>
 <li>Deadlines</li>
 <li>unterschiedliche Startzeiten der Jobs</li>
 </ul></li>
@@ -80,7 +80,10 @@ Created Dienstag 31 Mai 2016
 </p>
 
 <br>
-<br>
+
+<p>
+k
+</p>
 
 <h2>Lösung:</h2>
 
@@ -96,12 +99,12 @@ Created Dienstag 31 Mai 2016
 <li>der <b>globale Index</b> entspricht der Tupeldarstellung (Jobindex, Operationindex) im Modell </li>
 </ul></li>
 </ul>
-<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image.png"><br>
+<img src="./JSP_Evaluator_files/pasted_image.png"><br>
 <ul style='padding-left: 30pt'>
-<li>die genutzte Maschine wird wie folgt berechnet: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation.png">
+<li>die genutzte Maschine wird wie folgt berechnet: <img src="./JSP_Evaluator_files/equation.png">
 <ul>
-<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation001.png"> ist der Wert des j-ten Gens</li>
-<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation002.png"> ist die Anzahl der verfügbaren Maschinen (dies schließt nur die für diese Operation erlaubten Maschinen ein)</li>
+<li><img src="./JSP_Evaluator_files/equation001.png"> ist der Wert des j-ten Gens</li>
+<li><img src="./JSP_Evaluator_files/equation002.png"> ist die Anzahl der verfügbaren Maschinen (dies schließt nur die für diese Operation erlaubten Maschinen ein)</li>
 </ul>
 </li>
 <li>FIX() rundet ab </li>
@@ -109,12 +112,12 @@ Created Dienstag 31 Mai 2016
 <ul>
 <li>die Abarbeitungsreihenfolge wird random-key basiert aus dem Rest errechnet [bean1995random]
 <ul>
-<li>Rest: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation003.png"></li>
+<li>Rest: <img src="./JSP_Evaluator_files/equation003.png"></li>
 <li>je höher der Rest, desto höher ist die Priorität des Jobs in der Warteschlange</li>
-<li>durch diese Prioritäten kann es passieren, dass eine spätere Operation <b>O2</b> eines Jobs eine höhere Priorität bekommt, als eine vorherige <b>O1</b>
+<li>durch diese Prioritäten kann es passieren, dass alle Jobs auf den Maschinen, die die höchste Priorität haben, nicht abgearbeitet werden können, da sie auf eine im Job vorhergehende Operation warten müssen
 <ul>
-<li>dies führt durch die Abarbeitungsreihenfolge von Jobs zu einem Deadlock</li>
-<li>daher wird die Priorität von <b>O1 </b>angehoben (priority sharing)</li>
+<li>dies führt zu einem Deadlock</li>
+<li>daher wird der Scheduler, wenn dies für alle Maschinen eintritt, versuchen die Operationen mit der zweithöchsten Priorität abzuarbeiten, usw.</li>
 </ul></li>
 </ul></li>
 </ul>
@@ -165,13 +168,15 @@ als Modell wird MILP-1 abgewandelt [defersha2010parallel]<br>
 
 <p>
 aus: [defersha2010parallel]<br>
-<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image006.png"><br>
-<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation018.png"><br>
-<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation017.png"><br>
-<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation014.png"><br>
-<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image007.png"><br>
-(3) wird verändert zu: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation013.png"><br>
-<img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image008.png"><br>
+<img src="./JSP_Evaluator_files/pasted_image006.png"><br>
+<img src="./JSP_Evaluator_files/equation018.png"><br>
+<img src="./JSP_Evaluator_files/equation017.png"><br>
+<img src="./JSP_Evaluator_files/equation014.png"><br>
+<img src="./JSP_Evaluator_files/equation026.png"><br>
+<img src="./JSP_Evaluator_files/equation027.png"><br>
+<img src="./JSP_Evaluator_files/pasted_image007.png"><br>
+(3) wird verändert zu: <img src="./JSP_Evaluator_files/equation013.png"><br>
+<img src="./JSP_Evaluator_files/pasted_image008.png"><br>
 (1) alle Operationen sind <b>nur einer Maschine</b> zugeordnet<br>
 (2) nur wenn eine <b>Operation auf einer Maschine gescheduled</b> ist, gibt es eine Start- oder Fertigstellungszeit<br>
 (3) die <b>Fertigstellungszeit</b> einer Operation auf einer Maschine <b>ist die Startzeit + die Prozesszeit + Setupzeit</b>, wenn diese auf dieser Maschine gescheduled ist<br>
@@ -190,13 +195,13 @@ aus: [defersha2010parallel]<br>
 
 <p>
 <ul>
-<li>jeder Job besizt eine Deadline: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation008.png"></li>
-<li>wenn Fertigstellungzeit <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation005.png"> größer ist als <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation008.png">, dann ist deren Differenz die Verspätung <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation009.png"> (delay), sonst ist die Verspätung 0
+<li>jeder Job besizt eine Deadline: <img src="./JSP_Evaluator_files/equation008.png"></li>
+<li>wenn Fertigstellungzeit <img src="./JSP_Evaluator_files/equation005.png"> größer ist als <img src="./JSP_Evaluator_files/equation008.png">, dann ist deren Differenz die Verspätung <img src="./JSP_Evaluator_files/equation009.png"> (delay), sonst ist die Verspätung 0
 <ul>
-<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation006.png"></li>
+<li><img src="./JSP_Evaluator_files/equation006.png"></li>
 </ul>
 </li>
-<li>Gesamtverspätung: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation007.png"></li>
+<li>Gesamtverspätung: <img src="./JSP_Evaluator_files/equation007.png"></li>
 </ul>
 </p>
 
@@ -210,10 +215,10 @@ aus: [defersha2010parallel]<br>
 <ul>
 <li>die Last(load) auf einer Maschine ist der Quotient aus der Produktivzeit einer Maschine und der Gesamtsimulationszeit
 <ul>
-<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation010.png"></li>
+<li><img src="./JSP_Evaluator_files/equation010.png"></li>
 </ul>
 </li>
-<li>die Lastverteilung <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation012.png"> wird dann aus der Standardabweichung aller <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation011.png"> berechnet</li>
+<li>die Lastverteilung <img src="./JSP_Evaluator_files/equation012.png"> wird dann aus der Standardabweichung aller <img src="./JSP_Evaluator_files/equation011.png"> berechnet</li>
 </ul>
 </p>
 
@@ -227,7 +232,12 @@ aus: [defersha2010parallel]<br>
 <ul>
 <li>die Summe aller genutzten Setupzeiten
 <ul>
-<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation015.png"></li>
+<li><img src="./JSP_Evaluator_files/equation015.png"></li>
+<li>wenn vor der Ausführung der Operation auf der Maschine eine Leerlaufzeit ist, dann wird die während das Setup während dieser Zeit durchgeführt
+<ul>
+<li>solche Setups werden nicht in die Setupzeit eingerechnet (da diese effektiv keine Produktionszeit verwenden)</li>
+<li>Leerlauf wird auch partiell von der Setupzeit abgezogen, falls die Zeit nicht komplett reichen sollte  </li>
+</ul></li>
 </ul></li>
 </ul>
 </p>
@@ -241,28 +251,32 @@ aus: [defersha2010parallel]<br>
 <p>
 <ul>
 <li>die maximal gleichzeitig in der Produktion befindliche Anzahl an Produktionsmitteln</li>
-<li>dazu ist für jeden Job eine Anzahl Produktionsmittel <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation016.png"> hinterlegt</li>
-<li>nun ist zu folgenden Zeitpunkten der WIP <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation019.png"> zum Zeitpunkt t wie folgt definiert
+<li>dazu ist für jeden Job eine Anzahl Produktionsmittel <img src="./JSP_Evaluator_files/equation016.png"> hinterlegt</li>
+<li>nun ist zu folgenden Zeitpunkten der WIP <img src="./JSP_Evaluator_files/equation019.png"> zum Zeitpunkt t wie folgt definiert
 <ul>
-<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation020.png"></li>
-<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation021.png"></li>
-<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation022.png"></li>
+<li><img src="./JSP_Evaluator_files/equation020.png"></li>
+<li><img src="./JSP_Evaluator_files/equation021.png"></li>
+<li><img src="./JSP_Evaluator_files/equation022.png"></li>
 </ul>
 </li>
-<li>damit ist der WIP: <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation023.png"></li>
+<li>damit ist der WIP: <img src="./JSP_Evaluator_files/equation023.png"></li>
 </ul>
 </p>
 
 <br>
 
-<h4>Durchlaufzeit</h4>
+<h4>Flussfaktor</h4>
 
 <br>
 
 <p>
 <ul>
-<li>die Durchlaufzeit(passtime) <img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation024.png"> wird durch die maximale Zeit, die ein Job während der Simulation in der Produktion verweilt, gemessen</li>
-<li><img src="./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation025.png"></li>
+<li>Flussfaktor (flow factor) <img src="./JSP_Evaluator_files/equation024.png"> wird durch das durchschnittliche Verhältnis zwischen Durchlaufzeit und Prozesszeit angegeben
+<ul>
+<li>damit hat ein Job, der 50% seiner Zeit durch Warten oder Rüsten verbringt einen Flussfaktor von 2.0  </li>
+</ul>
+</li>
+<li><img src="./JSP_Evaluator_files/equation025.png"></li>
 </ul>
 </p>
 
@@ -273,194 +287,206 @@ aus: [defersha2010parallel]<br>
 	<div class='page-footer'>
 		<b>Backlinks:</b>
 
-		<a href='#Implementierung'>Implementierung</a>
+		<a href=''>Implementierung</a>
 
 		<br /><br />
 
 			<b>Attachments:</b>
 			<table>
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation.png'>equation.png</a></td><td>&nbsp;</td><td>673b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation.png'>equation.png</a></td><td>&nbsp;</td><td>673b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation.tex'>equation.tex</a></td><td>&nbsp;</td><td>28b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation.tex'>equation.tex</a></td><td>&nbsp;</td><td>28b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation001.png'>equation001.png</a></td><td>&nbsp;</td><td>235b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation001.png'>equation001.png</a></td><td>&nbsp;</td><td>235b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation001.tex'>equation001.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation001.tex'>equation001.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation002.png'>equation002.png</a></td><td>&nbsp;</td><td>294b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation002.png'>equation002.png</a></td><td>&nbsp;</td><td>294b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation002.tex'>equation002.tex</a></td><td>&nbsp;</td><td>4b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation002.tex'>equation002.tex</a></td><td>&nbsp;</td><td>4b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation003.png'>equation003.png</a></td><td>&nbsp;</td><td>530b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation003.png'>equation003.png</a></td><td>&nbsp;</td><td>530b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation003.tex'>equation003.tex</a></td><td>&nbsp;</td><td>28b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation003.tex'>equation003.tex</a></td><td>&nbsp;</td><td>28b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation004.png'>equation004.png</a></td><td>&nbsp;</td><td>266b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation004.png'>equation004.png</a></td><td>&nbsp;</td><td>266b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation004.tex'>equation004.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation004.tex'>equation004.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation005.png'>equation005.png</a></td><td>&nbsp;</td><td>259b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation005.png'>equation005.png</a></td><td>&nbsp;</td><td>259b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation005.tex'>equation005.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation005.tex'>equation005.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation006.png'>equation006.png</a></td><td>&nbsp;</td><td>1.25kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation006.png'>equation006.png</a></td><td>&nbsp;</td><td>1.25kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation006.tex'>equation006.tex</a></td><td>&nbsp;</td><td>88b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation006.tex'>equation006.tex</a></td><td>&nbsp;</td><td>88b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation007.png'>equation007.png</a></td><td>&nbsp;</td><td>581b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation007.png'>equation007.png</a></td><td>&nbsp;</td><td>581b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation007.tex'>equation007.tex</a></td><td>&nbsp;</td><td>22b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation007.tex'>equation007.tex</a></td><td>&nbsp;</td><td>22b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation008.png'>equation008.png</a></td><td>&nbsp;</td><td>284b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation008.png'>equation008.png</a></td><td>&nbsp;</td><td>284b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation008.tex'>equation008.tex</a></td><td>&nbsp;</td><td>11b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation008.tex'>equation008.tex</a></td><td>&nbsp;</td><td>11b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation009.png'>equation009.png</a></td><td>&nbsp;</td><td>266b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation009.png'>equation009.png</a></td><td>&nbsp;</td><td>266b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation009.tex'>equation009.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation009.tex'>equation009.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation010.png'>equation010.png</a></td><td>&nbsp;</td><td>1.15kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation010.png'>equation010.png</a></td><td>&nbsp;</td><td>1.15kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation010.tex'>equation010.tex</a></td><td>&nbsp;</td><td>83b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation010.tex'>equation010.tex</a></td><td>&nbsp;</td><td>83b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation011.png'>equation011.png</a></td><td>&nbsp;</td><td>258b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation011.png'>equation011.png</a></td><td>&nbsp;</td><td>258b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation011.tex'>equation011.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation011.tex'>equation011.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation012.png'>equation012.png</a></td><td>&nbsp;</td><td>215b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation012.png'>equation012.png</a></td><td>&nbsp;</td><td>215b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation012.tex'>equation012.tex</a></td><td>&nbsp;</td><td>1b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation012.tex'>equation012.tex</a></td><td>&nbsp;</td><td>1b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation013.png'>equation013.png</a></td><td>&nbsp;</td><td>1.98kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation013.png'>equation013.png</a></td><td>&nbsp;</td><td>1.98kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation013.tex'>equation013.tex</a></td><td>&nbsp;</td><td>154b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation013.tex'>equation013.tex</a></td><td>&nbsp;</td><td>154b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation014.png'>equation014.png</a></td><td>&nbsp;</td><td>1.74kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation014.png'>equation014.png</a></td><td>&nbsp;</td><td>1.74kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation014.tex'>equation014.tex</a></td><td>&nbsp;</td><td>128b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation014.tex'>equation014.tex</a></td><td>&nbsp;</td><td>128b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation015.png'>equation015.png</a></td><td>&nbsp;</td><td>1.20kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation015.png'>equation015.png</a></td><td>&nbsp;</td><td>2.92kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation015.tex'>equation015.tex</a></td><td>&nbsp;</td><td>68b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation015.tex'>equation015.tex</a></td><td>&nbsp;</td><td>200b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation016.png'>equation016.png</a></td><td>&nbsp;</td><td>264b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation016.png'>equation016.png</a></td><td>&nbsp;</td><td>264b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation016.tex'>equation016.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation016.tex'>equation016.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation017.png'>equation017.png</a></td><td>&nbsp;</td><td>735b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation017.png'>equation017.png</a></td><td>&nbsp;</td><td>735b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation017.tex'>equation017.tex</a></td><td>&nbsp;</td><td>47b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation017.tex'>equation017.tex</a></td><td>&nbsp;</td><td>47b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation018.png'>equation018.png</a></td><td>&nbsp;</td><td>953b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation018.png'>equation018.png</a></td><td>&nbsp;</td><td>953b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation018.tex'>equation018.tex</a></td><td>&nbsp;</td><td>54b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation018.tex'>equation018.tex</a></td><td>&nbsp;</td><td>54b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation019.png'>equation019.png</a></td><td>&nbsp;</td><td>286b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation019.png'>equation019.png</a></td><td>&nbsp;</td><td>286b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation019.tex'>equation019.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation019.tex'>equation019.tex</a></td><td>&nbsp;</td><td>3b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation020.png'>equation020.png</a></td><td>&nbsp;</td><td>357b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation020.png'>equation020.png</a></td><td>&nbsp;</td><td>357b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation020.tex'>equation020.tex</a></td><td>&nbsp;</td><td>7b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation020.tex'>equation020.tex</a></td><td>&nbsp;</td><td>7b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation021.png'>equation021.png</a></td><td>&nbsp;</td><td>1.21kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation021.png'>equation021.png</a></td><td>&nbsp;</td><td>1.21kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation021.tex'>equation021.tex</a></td><td>&nbsp;</td><td>83b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation021.tex'>equation021.tex</a></td><td>&nbsp;</td><td>83b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation022.png'>equation022.png</a></td><td>&nbsp;</td><td>1.55kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation022.png'>equation022.png</a></td><td>&nbsp;</td><td>1.55kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation022.tex'>equation022.tex</a></td><td>&nbsp;</td><td>105b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation022.tex'>equation022.tex</a></td><td>&nbsp;</td><td>105b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation023.png'>equation023.png</a></td><td>&nbsp;</td><td>545b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation023.png'>equation023.png</a></td><td>&nbsp;</td><td>545b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation023.tex'>equation023.tex</a></td><td>&nbsp;</td><td>13b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation023.tex'>equation023.tex</a></td><td>&nbsp;</td><td>13b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation024.png'>equation024.png</a></td><td>&nbsp;</td><td>234b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation024.png'>equation024.png</a></td><td>&nbsp;</td><td>234b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation024.tex'>equation024.tex</a></td><td>&nbsp;</td><td>1b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation024.tex'>equation024.tex</a></td><td>&nbsp;</td><td>1b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation025.png'>equation025.png</a></td><td>&nbsp;</td><td>1.01kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation025.png'>equation025.png</a></td><td>&nbsp;</td><td>1.27kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/equation025.tex'>equation025.tex</a></td><td>&nbsp;</td><td>61b</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation025.tex'>equation025.tex</a></td><td>&nbsp;</td><td>93b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image.png'>pasted_image.png</a></td><td>&nbsp;</td><td>11.6kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation026.png'>equation026.png</a></td><td>&nbsp;</td><td>997b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image001.png'>pasted_image001.png</a></td><td>&nbsp;</td><td>68.7kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation026.tex'>equation026.tex</a></td><td>&nbsp;</td><td>61b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image002.png'>pasted_image002.png</a></td><td>&nbsp;</td><td>40.5kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation027.png'>equation027.png</a></td><td>&nbsp;</td><td>1.20kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image003.png'>pasted_image003.png</a></td><td>&nbsp;</td><td>74.3kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/equation027.tex'>equation027.tex</a></td><td>&nbsp;</td><td>72b</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image004.png'>pasted_image004.png</a></td><td>&nbsp;</td><td>72.9kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/pasted_image.png'>pasted_image.png</a></td><td>&nbsp;</td><td>11.6kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image005.png'>pasted_image005.png</a></td><td>&nbsp;</td><td>27.9kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/pasted_image001.png'>pasted_image001.png</a></td><td>&nbsp;</td><td>68.7kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image006.png'>pasted_image006.png</a></td><td>&nbsp;</td><td>91.3kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/pasted_image002.png'>pasted_image002.png</a></td><td>&nbsp;</td><td>40.5kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image007.png'>pasted_image007.png</a></td><td>&nbsp;</td><td>19.5kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/pasted_image003.png'>pasted_image003.png</a></td><td>&nbsp;</td><td>74.3kb</td></tr>
 
 
-			<tr><td><a href='./JSP_Evaluator_files/Implementierung/JSP_Evaluator/pasted_image008.png'>pasted_image008.png</a></td><td>&nbsp;</td><td>52.2kb</td></tr>
+			<tr><td><a href='./JSP_Evaluator_files/pasted_image004.png'>pasted_image004.png</a></td><td>&nbsp;</td><td>72.9kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/pasted_image005.png'>pasted_image005.png</a></td><td>&nbsp;</td><td>27.9kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/pasted_image006.png'>pasted_image006.png</a></td><td>&nbsp;</td><td>91.3kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/pasted_image007.png'>pasted_image007.png</a></td><td>&nbsp;</td><td>19.5kb</td></tr>
+
+
+			<tr><td><a href='./JSP_Evaluator_files/pasted_image008.png'>pasted_image008.png</a></td><td>&nbsp;</td><td>52.2kb</td></tr>
 
 			</table>
 	</div>
