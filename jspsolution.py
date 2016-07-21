@@ -1,3 +1,6 @@
+""" Represents a solution that is coded permutation based. Provides means to
+access the priority and machine assignment for every operation.
+"""
 import math
 
 
@@ -9,27 +12,35 @@ class JspSolution:
 
     def __init__(self, model, sol_array):
         """
-        Initializes the datastructures. Precalculates the machine assignment and
-        priorities
+        Initializes the datastructures. Precalculates the machine assignment
+        and priorities
 
-        model:      the model this solution shall be used in (from:
-                    JspEvaluator.model)
-        sol_array:  array representation of the solution (permutationbased
-                    Encoding)
+        @param model: the model this solution shall be used in (from:
+        JspEvaluator.model)
+        @type model: L{jspmodel.JspModel}
+        @param sol_array: array representation of the solution
+        permutationbased Encoding)
+        @type sol_array: list
         """
         self.model = model
         self.values = sol_array
         self.machine_assignment =\
             [self._determine_machine_index(index)
-             for index in range(len(sol_array))]
+             for index, _ in enumerate(sol_array)]
         self.priorities =\
             [self._determine_priority(index)
-             for index in range(len(sol_array))]
+             for index, _ in enumerate(sol_array)]
 
     def get_machine_assignment(self, index):
         """
         Returns the machine index, that the operation at the index in the
         solution is assigned to.
+
+        @param index: the local index of the operation in the solution
+        @type index: number
+
+        @return: the index of the assigned machine
+        @rtype: number
         """
         return self.machine_assignment[index]
 
@@ -37,6 +48,12 @@ class JspSolution:
         """
         Returns the priority, that the operation at the index in the solution
         has.
+
+        @param index: the local index of the operation in the solution
+        @type index: number
+
+        @return: the priority for the operation on its machine
+        @rtype: number
         """
         return self.priorities[index]
 
@@ -45,19 +62,18 @@ class JspSolution:
         Function that determines on which machine an operation is processed.
         Only the for this operation allowed machines are considered.
 
-        index:      the index of the operation in the solution
+        @param index: the index of the operation in the solution
+        @type index: number
 
-        returns:    the machines index (int)
+        @return: the machines index (int)
+        @rtype: number
         """
 
         index = int(index)
-        if(self.values[index] < 0.0 or self.values[index] > 1.0):
+        if self.values[index] < 0.0 or self.values[index] > 1.0:
             raise ValueError("the allel shall be between 0.0 and 1.0")
 
-        operation = self.model.translate_global_index(index)
-        num_machines = len(self.model.allowed_machines[operation])
-        # this is the index of the machine relative to the allowed machines
-        rel_index = int(math.floor(num_machines * self.values[index]))
+        operation, _, rel_index = self._get_operation_and_rel_index(index)
 
         return self.model.allowed_machines[operation][rel_index]
 
@@ -67,18 +83,18 @@ class JspSolution:
         machine mapping, from the allel. This remainder is used for priority
         calculation.
 
-        index:      the index of the operation in the solution
+        @param index: the index of the operation in the solution
+        @type index: number
 
-        returns:    the priotity (float)
+        @return: the priority
+        @rtype: number
         """
 
         index = int(index)
-        if(self.values[index] < 0.0 or self.values[index] > 1.0):
+        if self.values[index] < 0.0 or self.values[index] > 1.0:
             raise ValueError("the allel shall be between 0.0 and 1.0")
 
-        operation = self.model.translate_global_index(index)
-        num_machines = len(self.model.allowed_machines[operation])
-        rel_index = int(math.floor(num_machines * self.values[index]))
+        _, num_machines, rel_index = self._get_operation_and_rel_index(index)
 
         return self.values[index] * num_machines - rel_index
 
@@ -88,5 +104,27 @@ class JspSolution:
     def __len__(self):
         """
         Returns the length of the value array.
+
+        @return: the length of the solution
+        @rtype: number
         """
         return len(self.values)
+
+    def _get_operation_and_rel_index(self, index):
+        """ Gets the job-operation tuple from a global index, and the relative
+        index of the assigned machine.
+
+        @param index: the local index of an operation
+
+        @return: 3 values:
+            the global index of the specified operation as tuple,
+            the number of allowed machines for the operation and
+            the local index of the assigned machine
+        @rtype: (number, number), number, number
+        """
+        operation = self.model.translate_global_index(index)
+        num_machines = len(self.model.allowed_machines[operation])
+        # this is the index of the machine relative to the allowed machines
+        rel_index = int(math.floor(num_machines * self.values[index]))
+
+        return operation, num_machines, rel_index

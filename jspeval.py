@@ -1,3 +1,9 @@
+"""
+Evaluator module.
+
+Holds the class JspEvaluator, which is used for evaluation of JspSolution and
+calculating machine assignments, schedules and metrics.
+"""
 import numpy
 
 
@@ -7,8 +13,9 @@ class JspEvaluator:
     to several functions to calculate the following metrics:
         - makespan
         - total tardiness
+        - total setuptimes
         - load balancing
-        - work in process
+        - work in process (WIP)
         - flowtime
     """
 
@@ -20,17 +27,18 @@ class JspEvaluator:
 
     def build_machine_assignment(self, solution):
         """
-        This function assigns operations to machines according to a solution   .
-        and calculates their priorities. A solution can be provided by an     .
-        optimization-algorithm                                               .
+        This function assigns operations to machines according to a solution
+        and calculates their priorities. A solution can be provided by an
+        optimization-algorithm.
 
-        solution: a solution for this model, that determines the machines and
-        the priorities
+        @param solution: a solution for this model, that determines the
+        machines and the priorities
 
-        returns: a dictionary for every operation containing its determined
+        @return: a dictionary for every operation containing its determined
         machine and priority. Like: (job, op): (machine, prio)
+        @rtype: dict
         """
-        if(self.model.solution_length() != len(solution)):
+        if self.model.solution_length() != len(solution):
             raise ValueError("the solution does not fit the model (",
                              self.model.solution_length(),
                              " operations versus ",
@@ -46,24 +54,23 @@ class JspEvaluator:
 
         return assignment
 
-    def execute_schedule(self, solution):
+    def execute_schedule(self, assignment):
         """
-        This function takes a solution, which must fit the model (i.e. it must
-        have priorities for the correct number of operations) and calculates
-        schedule for it. This means the time when a particular job is done is
-        calculated from the solution.
+        This function takes an assignment, which must fit the model (i.e.
+        it must have priorities for the correct number of operations) and
+        calculates schedule for it. This means the time when a particular job
+        is done is calculated from the assignment.
 
-        solution: an array using the permutation based coding for every
-        operation in the model
+        @param assignment: an dictionary holding the assigned machine and the
+        calculated priority for every operation (in global notation). Like:
+        (job, op): (machine, prio)
+        @type assignment: dict
 
-        returns:
-            1. a list with the machine assignments (which is a dict of all
-            operations with containing a tuple (machine, priority) for every
-            one)
-            2. a dictionary with every operation and its corresponding
-            finishtime and the used setuptime as a tuple like: (setup, finish)
+        @return: a dictionary with every operation and its corresponding
+        finishtime and the used setuptime as a tuple like: (job, op): (setup,
+        finish)
+        @rtype: dict
         """
-        assignment = self.build_machine_assignment(solution)
 
         schedule = {}
         # stores the finishing time of the last operation for every machine
@@ -121,70 +128,120 @@ class JspEvaluator:
                 avail_op[(op_index[0], op_index[1]+1)] =\
                     assignment[(op_index[0], op_index[1]+1)]
 
-        return assignment, schedule
+        return schedule
 
     def get_metrics(self, assignment, schedule):
         """
         Calculates the following metrics:
-            * makespan
-            * total tardiness
-            * load balance
-            * setup time
-            * max wip
-            * max passtime
+            - makespan
+            - total tardiness
+            - load balance
+            - setup time
+            - max wip
+            - max passtime
 
-        assignment:     the machine assignment for the operations
-        schedule:       The calculated schedule for a solution.
+        @param assignment:     the machine assignment for the operations
+        @type assignment: dict
+        @param schedule:       The calculated schedule for a solution.
+        @type schedule: dict
 
-        returns:        a dictionary with the metric names as keys.
+        @return:        a dictionary with the metric names as keys.
+        @rtype: dict
         """
         # search for the last readytime
         makespan = max(schedule.values(), key=lambda x: x[1])[1]
 
-        # find the maximum readytime for each job and compare to the deadline
+        # calculate tardiness
+        total_tardiness = self._calc_tardiness(schedule)
+
+        # calculate the loadbalance
+        loadbalance = self._calc_loadbalance(assignment, makespan)
+
+        # sum all setuptimes
+        setuptime = sum(times[0] for times in schedule.values())
+
+        # calculate the WIP and flowfactor
+        wip, flowfactor = self._calc_wip_and_flow(schedule)
+
+        return {"makespan": makespan,
+                "setup time": setuptime,
+                "load balance": loadbalance,
+                "max wip": wip,
+                "avg flowfactor": flowfactor,
+                "total tardiness": total_tardiness}
+
+    def _calc_tardiness(self, schedule):
+        """ Calculates the maximum timespan a job in schedule is too late.
+
+        @param schedule: the schedule to calculate the tardiness for
+        @type schedule: dict
+
+        @return:  the tardiness value
+        @rtype: number
+        """
+        # find the maximum readytime for each job and compare to the
+        # deadline
         job_ready = {}
-        for op in schedule:
-            if(job_ready.get(op[0], 0.0) < schedule[op][1]):
-                job_ready[op[0]] = schedule[op][1]
+        for op_id in schedule:
+            if job_ready.get(op_id[0], 0.0) < schedule[op_id][1]:
+                job_ready[op_id[0]] = schedule[op_id][1]
 
         total_tardiness = 0.0
         for jobnum in job_ready:
             t_ready = job_ready[jobnum]
             deadline = self.model.job[jobnum].deadline
-            if(t_ready > deadline):
+            if t_ready > deadline:
                 total_tardiness += t_ready - deadline
 
+        return total_tardiness
+
+    def _calc_loadbalance(self, assignment, makespan):
+        """ Calculated the load balance for the machines in assignment.
+
+        @param assignment: the machine assignment to calculate the load balance
+        for.
+        @type assignment: dict
+        @param makespan: the makespan for the schedule. (For load
+        normalization)
+        @type makespan: number
+
+        @return: the loadbalance value
+        @rtype: number
+        """
         # sum all production times for every machine
-        m_prod_times = [0.0 for idx in range(len(self.model.machine))]
-        for op, assign in assignment.iteritems():
+        m_prod_times = [0.0 for _ in enumerate(self.model.machine)]
+        for op_id, assign in assignment.items():
             m_prod_times[assign[0]] +=\
-                self.model.job[op[0]].operation[op[1]].op_duration
-        for idx in range(len(m_prod_times)):
-            m_prod_times[idx] = m_prod_times[idx]/makespan
+                self.model.job[op_id[0]].operation[op_id[1]].op_duration
+        for idx, time in enumerate(m_prod_times):
+            m_prod_times[idx] = time/makespan
         # calculate the standard deviation
-        loadbalance = numpy.std(m_prod_times)
+        return numpy.std(m_prod_times)
 
-        # sum all setuptimes
-        setuptime = sum(times[0] for times in schedule.values())
+    def _calc_wip_and_flow(self, schedule):
+        """ Calculates the maximum WIP (work in process) and the average flow factor.
 
-        # calculate the WIP and passtime
+        @param schedule: the schedule to calculate the WIP and flowfactor for.
+        @type schedule: dict
+
+        @return: 2 values: max wip, avg flowfactor
+        @rtype: number, number
+        """
         # create a list of all job start- and endtimes and their effects on the
         # WIP
         # use the start- and endtimes to calculate the flow factor for the job
         wip_changes = {}
         flowfactors = []
-        for job_id in range(len(self.model.job)):
-            last_op = len(self.model.job[job_id].operation) - 1
-            jobstart = schedule[(job_id, 0)][1] -\
-                self.model.job[job_id].operation[0].op_duration
+        for job_id, job in enumerate(self.model.job):
+            last_op = len(job.operation) - 1
+            jobstart = schedule[(job_id, 0)][1] - job.operation[0].op_duration
             jobend = schedule[(job_id, last_op)][1]
-            production_units = self.model.job[job_id].production_units
+            production_units = job.production_units
             wip_changes[jobstart] = production_units
             wip_changes[jobend] = -production_units
 
             # calculate the raw processtime for the job
-            ptime = sum([op.op_duration
-                         for op in self.model.job[job_id].operation])
+            ptime = sum([op.op_duration for op in job.operation])
             # store the passtimes
             flowfactors.append((jobend - jobstart) / ptime)
 
@@ -196,9 +253,4 @@ class JspEvaluator:
             if curr_wip > max_wip:
                 max_wip = curr_wip
 
-        return {"makespan": makespan,
-                "setup time": setuptime,
-                "load balance": loadbalance,
-                "max wip": max_wip,
-                "avg flowfactor": numpy.average(flowfactors),
-                "total tardiness": total_tardiness}
+        return max_wip, numpy.average(flowfactors)

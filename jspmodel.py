@@ -1,3 +1,7 @@
+""" This module contains the JspModel class. It reads the models from xml file
+and shares utility functions to the outside. Also shares the objectified view
+on the xml model.
+"""
 from lxml import etree
 from lxml import objectify
 from jspsolution import JspSolution
@@ -5,6 +9,11 @@ import numpy
 
 
 class JspModel:
+    """ Reads all model information from a xml file. Provides solution
+    length detection (solution_length()), creation of random solutions
+    (get_random_solution()), index translation (translate_global_index()) and
+    setuptimes for the operations (get_setuptime()).
+    """
 
     def __init__(self, schemafile="xml/example.xml"):
         """
@@ -38,10 +47,10 @@ class JspModel:
         machine_ids = [machine.get("machine_id")
                        for machine in self.model.machine]
         allowed_machines = {}
-        for i in range(len(self.model.job)):
-            for j in range(len(self.model.job[i].operation)):
+        for i, _ in enumerate(self.model.job):
+            for j, operation in enumerate(self.model.job[i].operation):
                 allowed = [machine_ids.index(m_name.text) for m_name in
-                           self.model.job[i].operation[j].allowed_machine]
+                           operation.allowed_machine]
                 allowed_machines[(i, j)] = allowed
 
         return allowed_machines
@@ -51,20 +60,21 @@ class JspModel:
         This function creates an array that is used to translate the global
         index (as used in the solution representation), where the Operations
         are all in one long sequence, to the job- and operation indexes of the
-        model. This list shall only be calculated once for one model, because it
-        will not change.
+        model. This list shall only be calculated once for one model, because
+        it will not change.
 
-        returns:    a list consisting of tuples (job_index, operation_index)
+        @return: a list consisting of tuples (job_index, operation_index)
+        example: [(0, 0), # 0: first operation will always have these indexes
+        @rtype: list
 
-        example:    [(0, 0), # 0: first operation will always have these indexes
-                    (0, 1), # 1: first job, second operation
-                    (1, 0), # 2: second job, first operation
-                    ...]
+                  (0, 1), # 1: first job, second operation
+                  (1, 0), # 2: second job, first operation
+                  ...]
         """
         translation_list = []
 
-        for i in range(len(self.model.job)):
-            for j in range(len(self.model.job[i].operation)):
+        for i, _ in enumerate(self.model.job):
+            for j, _ in enumerate(self.model.job[i].operation):
                 translation_list.append((i, j))
 
         return translation_list
@@ -78,10 +88,9 @@ class JspModel:
         try:
             # create a translationdictionary for the operation's names
             operationnames = {}
-            for i in range(len(self.model.job)):
-                for j in range(len(self.model.job[i].operation)):
-                    operationnames[self.model.job[i].operation[j]
-                                   .get("operation_id")] = (i, j)
+            for i, _ in enumerate(self.model.job):
+                for j, operation in enumerate(self.model.job[i].operation):
+                    operationnames[operation.get("operation_id")] = (i, j)
 
             # create a setuptimes dictionary, which uses the names as key
             namedsetuptimes =\
@@ -100,7 +109,8 @@ class JspModel:
         This function returns the number of operations in the model. This is
         also the allowed solution length.
 
-        returns:    the calculated length (int)
+        @return: the calculated length
+        @rtype: number
         """
         return sum(
             [len([op.tag for op in job.operation]) for job in self.model.job]
@@ -111,8 +121,9 @@ class JspModel:
         This function creates a random solution for the model. It uses the
         number of jobs from the model to determine the length of the solution.
 
-        returns: an array representation of the solution. (representing a
+        @return: an array representation of the solution. (convertible into a
         schedule)
+        @rtype: list
         """
         ind_length = self.solution_length()
         return JspSolution(self, numpy.random.rand(ind_length))
@@ -123,9 +134,11 @@ class JspModel:
         solution representation) into a tuple, consisting of the job- and
         operation-index.
 
-        index: the global index to translate (int)
+        @param index: the global index to translate (int)
+        @type index: number
 
-        returns: a tuple (job_index, operation_index) (int, int)
+        @return: a tuple (job_index, operation_index)
+        @rtype: number, number
         """
 
         return self.index_translation_list[index]
@@ -133,6 +146,9 @@ class JspModel:
     def get_setuptime(self, op_from, op_to):
         """
         Returns the setuptime between two operations or 0.0 if there isnt any.
+
+        @return: the setuptime
+        @rtype: number
         """
         op_tuple = (op_from, op_to)
         if op_tuple in self.setuptimes:

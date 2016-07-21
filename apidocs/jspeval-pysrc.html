@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>jspeval</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="https://github.com/mYstar/JSPEval">JspEval</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;jspeval
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="jspeval-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="jspeval-module.html">Module jspeval</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-docstring">Evaluator module.</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-docstring">Holds the class JspEvaluator, which is used for evaluation of JspSolution and</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-docstring">calculating machine assignments, schedules and metrics.</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">numpy</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"> </tt>
+<a name="JspEvaluator"></a><div id="JspEvaluator-def"><a name="L10"></a><tt class="py-lineno"> 10</tt> <a class="py-toggle" href="#" id="JspEvaluator-toggle" onclick="return toggle('JspEvaluator');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="jspeval.JspEvaluator-class.html">JspEvaluator</a><tt class="py-op">:</tt> </tt>
+</div><div id="JspEvaluator-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="JspEvaluator-expanded"><a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"><tt class="py-docstring">    This class provides a way to evaluate JspModels. A JspSolution can be given</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt class="py-docstring">    to several functions to calculate the following metrics:</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt class="py-docstring">        - makespan</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt class="py-docstring">        - total tardiness</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt class="py-docstring">        - total setuptimes</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt class="py-docstring">        - load balancing</tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-docstring">        - work in process (WIP)</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt class="py-docstring">        - flowtime</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"> </tt>
+<a name="JspEvaluator.__init__"></a><div id="JspEvaluator.__init__-def"><a name="L22"></a><tt class="py-lineno"> 22</tt> <a class="py-toggle" href="#" id="JspEvaluator.__init__-toggle" onclick="return toggle('JspEvaluator.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="jspeval.JspEvaluator-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">model</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="JspEvaluator.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="JspEvaluator.__init__-expanded"><a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line"><tt class="py-docstring">        Takes the model, that shall be used to calculate the metrics.</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt> <tt class="py-op">=</tt> <tt class="py-name">model</tt> </tt>
+</div><a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"> </tt>
+<a name="JspEvaluator.build_machine_assignment"></a><div id="JspEvaluator.build_machine_assignment-def"><a name="L28"></a><tt class="py-lineno"> 28</tt> <a class="py-toggle" href="#" id="JspEvaluator.build_machine_assignment-toggle" onclick="return toggle('JspEvaluator.build_machine_assignment');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="jspeval.JspEvaluator-class.html#build_machine_assignment">build_machine_assignment</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">solution</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="JspEvaluator.build_machine_assignment-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="JspEvaluator.build_machine_assignment-expanded"><a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"><tt class="py-docstring">        This function assigns operations to machines according to a solution</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line"><tt class="py-docstring">        and calculates their priorities. A solution can be provided by an</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line"><tt class="py-docstring">        optimization-algorithm.</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line"><tt class="py-docstring">        @param solution: a solution for this model, that determines the</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line"><tt class="py-docstring">        machines and the priorities</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line"><tt class="py-docstring">        @return: a dictionary for every operation containing its determined</tt> </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line"><tt class="py-docstring">        machine and priority. Like: (job, op): (machine, prio)</tt> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line"><tt class="py-docstring">        @rtype: dict</tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt id="link-0" class="py-name" targets="Method jspmodel.JspModel.solution_length()=jspmodel.JspModel-class.html#solution_length"><a title="jspmodel.JspModel.solution_length" class="py-name" href="#" onclick="return doclink('link-0', 'solution_length', 'link-0');">solution_length</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> <tt class="py-op">!=</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">solution</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line">            <tt class="py-keyword">raise</tt> <tt class="py-name">ValueError</tt><tt class="py-op">(</tt><tt class="py-string">"the solution does not fit the model ("</tt><tt class="py-op">,</tt> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line">                             <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt id="link-1" class="py-name"><a title="jspmodel.JspModel.solution_length" class="py-name" href="#" onclick="return doclink('link-1', 'solution_length', 'link-0');">solution_length</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line">                             <tt class="py-string">" operations versus "</tt><tt class="py-op">,</tt> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line">                             <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">solution</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-string">" solution length)"</tt><tt class="py-op">)</tt> </tt>
+<a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line"> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line">        <tt class="py-comment"># create a dictionary of the operations and their priority per machine</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line">        <tt class="py-name">assignment</tt> <tt class="py-op">=</tt> <tt class="py-op">{</tt><tt class="py-op">}</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">index</tt> <tt class="py-keyword">in</tt> <tt class="py-name">range</tt><tt class="py-op">(</tt><tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">solution</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line">            <tt class="py-name">machine_idx</tt> <tt class="py-op">=</tt> <tt class="py-name">solution</tt><tt class="py-op">.</tt><tt id="link-2" class="py-name" targets="Method jspsolution.JspSolution.get_machine_assignment()=jspsolution.JspSolution-class.html#get_machine_assignment"><a title="jspsolution.JspSolution.get_machine_assignment" class="py-name" href="#" onclick="return doclink('link-2', 'get_machine_assignment', 'link-2');">get_machine_assignment</a></tt><tt class="py-op">(</tt><tt class="py-name">index</tt><tt class="py-op">)</tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line">            <tt class="py-name">global_idx</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt id="link-3" class="py-name" targets="Method jspmodel.JspModel.translate_global_index()=jspmodel.JspModel-class.html#translate_global_index"><a title="jspmodel.JspModel.translate_global_index" class="py-name" href="#" onclick="return doclink('link-3', 'translate_global_index', 'link-3');">translate_global_index</a></tt><tt class="py-op">(</tt><tt class="py-name">index</tt><tt class="py-op">)</tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line">            <tt class="py-name">priority</tt> <tt class="py-op">=</tt> <tt class="py-name">solution</tt><tt class="py-op">.</tt><tt id="link-4" class="py-name" targets="Method jspsolution.JspSolution.get_priority()=jspsolution.JspSolution-class.html#get_priority"><a title="jspsolution.JspSolution.get_priority" class="py-name" href="#" onclick="return doclink('link-4', 'get_priority', 'link-4');">get_priority</a></tt><tt class="py-op">(</tt><tt class="py-name">index</tt><tt class="py-op">)</tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line">            <tt class="py-name">assignment</tt><tt class="py-op">[</tt><tt class="py-name">global_idx</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-name">machine_idx</tt><tt class="py-op">,</tt> <tt class="py-name">priority</tt><tt class="py-op">)</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line"> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">assignment</tt> </tt>
+</div><a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line"> </tt>
+<a name="JspEvaluator.execute_schedule"></a><div id="JspEvaluator.execute_schedule-def"><a name="L57"></a><tt class="py-lineno"> 57</tt> <a class="py-toggle" href="#" id="JspEvaluator.execute_schedule-toggle" onclick="return toggle('JspEvaluator.execute_schedule');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="jspeval.JspEvaluator-class.html#execute_schedule">execute_schedule</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">assignment</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="JspEvaluator.execute_schedule-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="JspEvaluator.execute_schedule-expanded"><a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line"><tt class="py-docstring">        This function takes an assignment, which must fit the model (i.e.</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line"><tt class="py-docstring">        it must have priorities for the correct number of operations) and</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line"><tt class="py-docstring">        calculates schedule for it. This means the time when a particular job</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line"><tt class="py-docstring">        is done is calculated from the assignment.</tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line"><tt class="py-docstring">        @param assignment: an dictionary holding the assigned machine and the</tt> </tt>
+<a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line"><tt class="py-docstring">        calculated priority for every operation (in global notation). Like:</tt> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line"><tt class="py-docstring">        (job, op): (machine, prio)</tt> </tt>
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line"><tt class="py-docstring">        @type assignment: dict</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line"><tt class="py-docstring">        @return: a dictionary with every operation and its corresponding</tt> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line"><tt class="py-docstring">        finishtime and the used setuptime as a tuple like: (job, op): (setup,</tt> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line"><tt class="py-docstring">        finish)</tt> </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line"><tt class="py-docstring">        @rtype: dict</tt> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line"> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line">        <tt class="py-name">schedule</tt> <tt class="py-op">=</tt> <tt class="py-op">{</tt><tt class="py-op">}</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">        <tt class="py-comment"># stores the finishing time of the last operation for every machine</tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line">        <tt class="py-name">machinetime</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-number">0.0</tt> <tt class="py-keyword">for</tt> <tt class="py-name">i</tt> <tt class="py-keyword">in</tt> <tt class="py-name">range</tt><tt class="py-op">(</tt><tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt class="py-name">machine</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">]</tt> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line">        <tt class="py-comment"># stores the last processed operation for every machine</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line">        <tt class="py-name">last_op</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-name">None</tt> <tt class="py-keyword">for</tt> <tt class="py-name">i</tt> <tt class="py-keyword">in</tt> <tt class="py-name">range</tt><tt class="py-op">(</tt><tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt class="py-name">machine</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">]</tt> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">        <tt class="py-comment"># init the dict of available operations + their machines and priorities</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line">        <tt class="py-name">avail_op</tt> <tt class="py-op">=</tt> <tt class="py-op">{</tt><tt class="py-op">}</tt> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">i</tt> <tt class="py-keyword">in</tt> <tt class="py-name">range</tt><tt class="py-op">(</tt><tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt class="py-name">job</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">            <tt class="py-name">avail_op</tt><tt class="py-op">[</tt><tt class="py-op">(</tt><tt class="py-name">i</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-name">assignment</tt><tt class="py-op">[</tt><tt class="py-op">(</tt><tt class="py-name">i</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">]</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line"> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">        <tt class="py-comment"># calculate execution of all operations in order</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">i</tt> <tt class="py-keyword">in</tt> <tt class="py-name">range</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt id="link-5" class="py-name"><a title="jspmodel.JspModel.solution_length" class="py-name" href="#" onclick="return doclink('link-5', 'solution_length', 'link-0');">solution_length</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">            <tt class="py-comment"># get the available operation with the highest priority</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">            <tt class="py-name">op_index</tt> <tt class="py-op">=</tt> <tt class="py-name">max</tt><tt class="py-op">(</tt><tt class="py-name">avail_op</tt><tt class="py-op">.</tt><tt class="py-name">keys</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-name">key</tt><tt class="py-op">=</tt><tt class="py-keyword">lambda</tt> <tt class="py-name">x</tt><tt class="py-op">:</tt> <tt class="py-name">avail_op</tt><tt class="py-op">[</tt><tt class="py-name">x</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">            <tt class="py-name">job</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt class="py-name">job</tt><tt class="py-op">[</tt><tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">]</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">            <tt class="py-name">operation</tt> <tt class="py-op">=</tt> <tt class="py-name">job</tt><tt class="py-op">.</tt><tt class="py-name">operation</tt><tt class="py-op">[</tt><tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">]</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line">            <tt class="py-name">machine</tt> <tt class="py-op">=</tt> <tt class="py-name">avail_op</tt><tt class="py-op">[</tt><tt class="py-name">op_index</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line"> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line">            <tt class="py-comment"># the first operation's starttime is the job's starttime</tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> <tt class="py-op">==</tt> <tt class="py-number">0</tt><tt class="py-op">:</tt> </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line">                <tt class="py-name">starttime</tt> <tt class="py-op">=</tt> <tt class="py-name">job</tt><tt class="py-op">.</tt><tt class="py-name">starttime</tt> </tt>
+<a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line">            <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line">                <tt class="py-comment"># all other operations can start when their predecessors</tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">                <tt class="py-comment"># are done</tt> </tt>
+<a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line">                <tt class="py-name">starttime</tt> <tt class="py-op">=</tt> \ </tt>
+<a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line">                    <tt class="py-name">schedule</tt><tt class="py-op">[</tt><tt class="py-op">(</tt><tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">-</tt><tt class="py-number">1</tt><tt class="py-op">)</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line"> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line">            <tt class="py-comment"># calculate the setuptime</tt> </tt>
+<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line">            <tt class="py-name">setuptime</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name" targets="Method jspmodel.JspModel.get_setuptime()=jspmodel.JspModel-class.html#get_setuptime"><a title="jspmodel.JspModel.get_setuptime" class="py-name" href="#" onclick="return doclink('link-6', 'get_setuptime', 'link-6');">get_setuptime</a></tt><tt class="py-op">(</tt> </tt>
+<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line">                <tt class="py-name">last_op</tt><tt class="py-op">[</tt><tt class="py-name">machine</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> </tt>
+<a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line">                <tt class="py-name">op_index</tt><tt class="py-op">)</tt> </tt>
+<a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line"> </tt>
+<a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line">            <tt class="py-comment"># calculate the time the operation is finished</tt> </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">machinetime</tt><tt class="py-op">[</tt><tt class="py-name">machine</tt><tt class="py-op">]</tt> <tt class="py-op">+</tt> <tt class="py-name">setuptime</tt> <tt class="py-op">&gt;</tt> <tt class="py-name">starttime</tt><tt class="py-op">:</tt> </tt>
+<a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line">                <tt class="py-name">start</tt> <tt class="py-op">=</tt> <tt class="py-name">machinetime</tt><tt class="py-op">[</tt><tt class="py-name">machine</tt><tt class="py-op">]</tt> <tt class="py-op">+</tt> <tt class="py-name">setuptime</tt> </tt>
+<a name="L110"></a><tt class="py-lineno">110</tt>  <tt class="py-line">                <tt class="py-comment"># calculate partial setuptimes if necessary</tt> </tt>
+<a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-name">starttime</tt> <tt class="py-op">&gt;</tt> <tt class="py-name">machinetime</tt><tt class="py-op">[</tt><tt class="py-name">machine</tt><tt class="py-op">]</tt><tt class="py-op">:</tt> </tt>
+<a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line">                    <tt class="py-name">setuptime</tt> <tt class="py-op">-=</tt> <tt class="py-name">starttime</tt> <tt class="py-op">-</tt> <tt class="py-name">machinetime</tt><tt class="py-op">[</tt><tt class="py-name">machine</tt><tt class="py-op">]</tt> </tt>
+<a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line">            <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L114"></a><tt class="py-lineno">114</tt>  <tt class="py-line">                <tt class="py-name">start</tt> <tt class="py-op">=</tt> <tt class="py-name">starttime</tt> </tt>
+<a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line">                <tt class="py-comment"># readjust hidden setuptime (done in idle time)</tt> </tt>
+<a name="L116"></a><tt class="py-lineno">116</tt>  <tt class="py-line">                <tt class="py-name">setuptime</tt> <tt class="py-op">=</tt> <tt class="py-number">0.0</tt> </tt>
+<a name="L117"></a><tt class="py-lineno">117</tt>  <tt class="py-line">            <tt class="py-name">finish_time</tt> <tt class="py-op">=</tt> <tt class="py-name">start</tt> <tt class="py-op">+</tt> <tt class="py-name">operation</tt><tt class="py-op">.</tt><tt class="py-name">op_duration</tt> </tt>
+<a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line"> </tt>
+<a name="L119"></a><tt class="py-lineno">119</tt>  <tt class="py-line">            <tt class="py-name">schedule</tt><tt class="py-op">[</tt><tt class="py-name">op_index</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-name">setuptime</tt><tt class="py-op">,</tt> <tt class="py-name">finish_time</tt><tt class="py-op">)</tt> </tt>
+<a name="L120"></a><tt class="py-lineno">120</tt>  <tt class="py-line"> </tt>
+<a name="L121"></a><tt class="py-lineno">121</tt>  <tt class="py-line">            <tt class="py-comment"># cleanup</tt> </tt>
+<a name="L122"></a><tt class="py-lineno">122</tt>  <tt class="py-line">            <tt class="py-name">machinetime</tt><tt class="py-op">[</tt><tt class="py-name">machine</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-name">finish_time</tt> </tt>
+<a name="L123"></a><tt class="py-lineno">123</tt>  <tt class="py-line">            <tt class="py-name">last_op</tt><tt class="py-op">[</tt><tt class="py-name">machine</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-name">op_index</tt> </tt>
+<a name="L124"></a><tt class="py-lineno">124</tt>  <tt class="py-line">            <tt class="py-keyword">del</tt> <tt class="py-name">avail_op</tt><tt class="py-op">[</tt><tt class="py-op">(</tt><tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">)</tt><tt class="py-op">]</tt> </tt>
+<a name="L125"></a><tt class="py-lineno">125</tt>  <tt class="py-line">            <tt class="py-comment"># insert next operation into available list, if this was not the</tt> </tt>
+<a name="L126"></a><tt class="py-lineno">126</tt>  <tt class="py-line">            <tt class="py-comment"># last</tt> </tt>
+<a name="L127"></a><tt class="py-lineno">127</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> <tt class="py-op">&lt;</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt class="py-name">job</tt><tt class="py-op">[</tt><tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">]</tt><tt class="py-op">.</tt><tt class="py-name">operation</tt><tt class="py-op">)</tt> <tt class="py-op">-</tt> <tt class="py-number">1</tt><tt class="py-op">:</tt> </tt>
+<a name="L128"></a><tt class="py-lineno">128</tt>  <tt class="py-line">                <tt class="py-name">avail_op</tt><tt class="py-op">[</tt><tt class="py-op">(</tt><tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">+</tt><tt class="py-number">1</tt><tt class="py-op">)</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt>\ </tt>
+<a name="L129"></a><tt class="py-lineno">129</tt>  <tt class="py-line">                    <tt class="py-name">assignment</tt><tt class="py-op">[</tt><tt class="py-op">(</tt><tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt class="py-name">op_index</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">+</tt><tt class="py-number">1</tt><tt class="py-op">)</tt><tt class="py-op">]</tt> </tt>
+<a name="L130"></a><tt class="py-lineno">130</tt>  <tt class="py-line"> </tt>
+<a name="L131"></a><tt class="py-lineno">131</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">schedule</tt> </tt>
+</div><a name="L132"></a><tt class="py-lineno">132</tt>  <tt class="py-line"> </tt>
+<a name="JspEvaluator.get_metrics"></a><div id="JspEvaluator.get_metrics-def"><a name="L133"></a><tt class="py-lineno">133</tt> <a class="py-toggle" href="#" id="JspEvaluator.get_metrics-toggle" onclick="return toggle('JspEvaluator.get_metrics');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="jspeval.JspEvaluator-class.html#get_metrics">get_metrics</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">assignment</tt><tt class="py-op">,</tt> <tt class="py-param">schedule</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="JspEvaluator.get_metrics-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="JspEvaluator.get_metrics-expanded"><a name="L134"></a><tt class="py-lineno">134</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L135"></a><tt class="py-lineno">135</tt>  <tt class="py-line"><tt class="py-docstring">        Calculates the following metrics:</tt> </tt>
+<a name="L136"></a><tt class="py-lineno">136</tt>  <tt class="py-line"><tt class="py-docstring">            - makespan</tt> </tt>
+<a name="L137"></a><tt class="py-lineno">137</tt>  <tt class="py-line"><tt class="py-docstring">            - total tardiness</tt> </tt>
+<a name="L138"></a><tt class="py-lineno">138</tt>  <tt class="py-line"><tt class="py-docstring">            - load balance</tt> </tt>
+<a name="L139"></a><tt class="py-lineno">139</tt>  <tt class="py-line"><tt class="py-docstring">            - setup time</tt> </tt>
+<a name="L140"></a><tt class="py-lineno">140</tt>  <tt class="py-line"><tt class="py-docstring">            - max wip</tt> </tt>
+<a name="L141"></a><tt class="py-lineno">141</tt>  <tt class="py-line"><tt class="py-docstring">            - max passtime</tt> </tt>
+<a name="L142"></a><tt class="py-lineno">142</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L143"></a><tt class="py-lineno">143</tt>  <tt class="py-line"><tt class="py-docstring">        @param assignment:     the machine assignment for the operations</tt> </tt>
+<a name="L144"></a><tt class="py-lineno">144</tt>  <tt class="py-line"><tt class="py-docstring">        @type assignment: dict</tt> </tt>
+<a name="L145"></a><tt class="py-lineno">145</tt>  <tt class="py-line"><tt class="py-docstring">        @param schedule:       The calculated schedule for a solution.</tt> </tt>
+<a name="L146"></a><tt class="py-lineno">146</tt>  <tt class="py-line"><tt class="py-docstring">        @type schedule: dict</tt> </tt>
+<a name="L147"></a><tt class="py-lineno">147</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L148"></a><tt class="py-lineno">148</tt>  <tt class="py-line"><tt class="py-docstring">        @return:        a dictionary with the metric names as keys.</tt> </tt>
+<a name="L149"></a><tt class="py-lineno">149</tt>  <tt class="py-line"><tt class="py-docstring">        @rtype: dict</tt> </tt>
+<a name="L150"></a><tt class="py-lineno">150</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L151"></a><tt class="py-lineno">151</tt>  <tt class="py-line">        <tt class="py-comment"># search for the last readytime</tt> </tt>
+<a name="L152"></a><tt class="py-lineno">152</tt>  <tt class="py-line">        <tt class="py-name">makespan</tt> <tt class="py-op">=</tt> <tt class="py-name">max</tt><tt class="py-op">(</tt><tt class="py-name">schedule</tt><tt class="py-op">.</tt><tt class="py-name">values</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-name">key</tt><tt class="py-op">=</tt><tt class="py-keyword">lambda</tt> <tt class="py-name">x</tt><tt class="py-op">:</tt> <tt class="py-name">x</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">)</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> </tt>
+<a name="L153"></a><tt class="py-lineno">153</tt>  <tt class="py-line"> </tt>
+<a name="L154"></a><tt class="py-lineno">154</tt>  <tt class="py-line">        <tt class="py-comment"># calculate tardiness</tt> </tt>
+<a name="L155"></a><tt class="py-lineno">155</tt>  <tt class="py-line">        <tt class="py-name">total_tardiness</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-7" class="py-name" targets="Method jspeval.JspEvaluator._calc_tardiness()=jspeval.JspEvaluator-class.html#_calc_tardiness"><a title="jspeval.JspEvaluator._calc_tardiness" class="py-name" href="#" onclick="return doclink('link-7', '_calc_tardiness', 'link-7');">_calc_tardiness</a></tt><tt class="py-op">(</tt><tt class="py-name">schedule</tt><tt class="py-op">)</tt> </tt>
+<a name="L156"></a><tt class="py-lineno">156</tt>  <tt class="py-line"> </tt>
+<a name="L157"></a><tt class="py-lineno">157</tt>  <tt class="py-line">        <tt class="py-comment"># calculate the loadbalance</tt> </tt>
+<a name="L158"></a><tt class="py-lineno">158</tt>  <tt class="py-line">        <tt class="py-name">loadbalance</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-8" class="py-name" targets="Method jspeval.JspEvaluator._calc_loadbalance()=jspeval.JspEvaluator-class.html#_calc_loadbalance"><a title="jspeval.JspEvaluator._calc_loadbalance" class="py-name" href="#" onclick="return doclink('link-8', '_calc_loadbalance', 'link-8');">_calc_loadbalance</a></tt><tt class="py-op">(</tt><tt class="py-name">assignment</tt><tt class="py-op">,</tt> <tt class="py-name">makespan</tt><tt class="py-op">)</tt> </tt>
+<a name="L159"></a><tt class="py-lineno">159</tt>  <tt class="py-line"> </tt>
+<a name="L160"></a><tt class="py-lineno">160</tt>  <tt class="py-line">        <tt class="py-comment"># sum all setuptimes</tt> </tt>
+<a name="L161"></a><tt class="py-lineno">161</tt>  <tt class="py-line">        <tt class="py-name">setuptime</tt> <tt class="py-op">=</tt> <tt class="py-name">sum</tt><tt class="py-op">(</tt><tt class="py-name">times</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-keyword">for</tt> <tt class="py-name">times</tt> <tt class="py-keyword">in</tt> <tt class="py-name">schedule</tt><tt class="py-op">.</tt><tt class="py-name">values</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L162"></a><tt class="py-lineno">162</tt>  <tt class="py-line"> </tt>
+<a name="L163"></a><tt class="py-lineno">163</tt>  <tt class="py-line">        <tt class="py-comment"># calculate the WIP and flowfactor</tt> </tt>
+<a name="L164"></a><tt class="py-lineno">164</tt>  <tt class="py-line">        <tt class="py-name">wip</tt><tt class="py-op">,</tt> <tt class="py-name">flowfactor</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-9" class="py-name" targets="Method jspeval.JspEvaluator._calc_wip_and_flow()=jspeval.JspEvaluator-class.html#_calc_wip_and_flow"><a title="jspeval.JspEvaluator._calc_wip_and_flow" class="py-name" href="#" onclick="return doclink('link-9', '_calc_wip_and_flow', 'link-9');">_calc_wip_and_flow</a></tt><tt class="py-op">(</tt><tt class="py-name">schedule</tt><tt class="py-op">)</tt> </tt>
+<a name="L165"></a><tt class="py-lineno">165</tt>  <tt class="py-line"> </tt>
+<a name="L166"></a><tt class="py-lineno">166</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-op">{</tt><tt class="py-string">"makespan"</tt><tt class="py-op">:</tt> <tt class="py-name">makespan</tt><tt class="py-op">,</tt> </tt>
+<a name="L167"></a><tt class="py-lineno">167</tt>  <tt class="py-line">                <tt class="py-string">"setup time"</tt><tt class="py-op">:</tt> <tt class="py-name">setuptime</tt><tt class="py-op">,</tt> </tt>
+<a name="L168"></a><tt class="py-lineno">168</tt>  <tt class="py-line">                <tt class="py-string">"load balance"</tt><tt class="py-op">:</tt> <tt class="py-name">loadbalance</tt><tt class="py-op">,</tt> </tt>
+<a name="L169"></a><tt class="py-lineno">169</tt>  <tt class="py-line">                <tt class="py-string">"max wip"</tt><tt class="py-op">:</tt> <tt class="py-name">wip</tt><tt class="py-op">,</tt> </tt>
+<a name="L170"></a><tt class="py-lineno">170</tt>  <tt class="py-line">                <tt class="py-string">"avg flowfactor"</tt><tt class="py-op">:</tt> <tt class="py-name">flowfactor</tt><tt class="py-op">,</tt> </tt>
+<a name="L171"></a><tt class="py-lineno">171</tt>  <tt class="py-line">                <tt class="py-string">"total tardiness"</tt><tt class="py-op">:</tt> <tt class="py-name">total_tardiness</tt><tt class="py-op">}</tt> </tt>
+</div><a name="L172"></a><tt class="py-lineno">172</tt>  <tt class="py-line"> </tt>
+<a name="JspEvaluator._calc_tardiness"></a><div id="JspEvaluator._calc_tardiness-def"><a name="L173"></a><tt class="py-lineno">173</tt> <a class="py-toggle" href="#" id="JspEvaluator._calc_tardiness-toggle" onclick="return toggle('JspEvaluator._calc_tardiness');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="jspeval.JspEvaluator-class.html#_calc_tardiness">_calc_tardiness</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">schedule</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="JspEvaluator._calc_tardiness-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="JspEvaluator._calc_tardiness-expanded"><a name="L174"></a><tt class="py-lineno">174</tt>  <tt class="py-line">        <tt class="py-docstring">""" Calculates the maximum timespan a job in schedule is too late.</tt> </tt>
+<a name="L175"></a><tt class="py-lineno">175</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L176"></a><tt class="py-lineno">176</tt>  <tt class="py-line"><tt class="py-docstring">        @param schedule: the schedule to calculate the tardiness for</tt> </tt>
+<a name="L177"></a><tt class="py-lineno">177</tt>  <tt class="py-line"><tt class="py-docstring">        @type schedule: dict</tt> </tt>
+<a name="L178"></a><tt class="py-lineno">178</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L179"></a><tt class="py-lineno">179</tt>  <tt class="py-line"><tt class="py-docstring">        @return:  the tardiness value</tt> </tt>
+<a name="L180"></a><tt class="py-lineno">180</tt>  <tt class="py-line"><tt class="py-docstring">        @rtype: number</tt> </tt>
+<a name="L181"></a><tt class="py-lineno">181</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L182"></a><tt class="py-lineno">182</tt>  <tt class="py-line">        <tt class="py-comment"># find the maximum readytime for each job and compare to the</tt> </tt>
+<a name="L183"></a><tt class="py-lineno">183</tt>  <tt class="py-line">        <tt class="py-comment"># deadline</tt> </tt>
+<a name="L184"></a><tt class="py-lineno">184</tt>  <tt class="py-line">        <tt class="py-name">job_ready</tt> <tt class="py-op">=</tt> <tt class="py-op">{</tt><tt class="py-op">}</tt> </tt>
+<a name="L185"></a><tt class="py-lineno">185</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">op_id</tt> <tt class="py-keyword">in</tt> <tt class="py-name">schedule</tt><tt class="py-op">:</tt> </tt>
+<a name="L186"></a><tt class="py-lineno">186</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">job_ready</tt><tt class="py-op">.</tt><tt class="py-name">get</tt><tt class="py-op">(</tt><tt class="py-name">op_id</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt class="py-number">0.0</tt><tt class="py-op">)</tt> <tt class="py-op">&lt;</tt> <tt class="py-name">schedule</tt><tt class="py-op">[</tt><tt class="py-name">op_id</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">:</tt> </tt>
+<a name="L187"></a><tt class="py-lineno">187</tt>  <tt class="py-line">                <tt class="py-name">job_ready</tt><tt class="py-op">[</tt><tt class="py-name">op_id</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-name">schedule</tt><tt class="py-op">[</tt><tt class="py-name">op_id</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> </tt>
+<a name="L188"></a><tt class="py-lineno">188</tt>  <tt class="py-line"> </tt>
+<a name="L189"></a><tt class="py-lineno">189</tt>  <tt class="py-line">        <tt class="py-name">total_tardiness</tt> <tt class="py-op">=</tt> <tt class="py-number">0.0</tt> </tt>
+<a name="L190"></a><tt class="py-lineno">190</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">jobnum</tt> <tt class="py-keyword">in</tt> <tt class="py-name">job_ready</tt><tt class="py-op">:</tt> </tt>
+<a name="L191"></a><tt class="py-lineno">191</tt>  <tt class="py-line">            <tt class="py-name">t_ready</tt> <tt class="py-op">=</tt> <tt class="py-name">job_ready</tt><tt class="py-op">[</tt><tt class="py-name">jobnum</tt><tt class="py-op">]</tt> </tt>
+<a name="L192"></a><tt class="py-lineno">192</tt>  <tt class="py-line">            <tt class="py-name">deadline</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt class="py-name">job</tt><tt class="py-op">[</tt><tt class="py-name">jobnum</tt><tt class="py-op">]</tt><tt class="py-op">.</tt><tt class="py-name">deadline</tt> </tt>
+<a name="L193"></a><tt class="py-lineno">193</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">t_ready</tt> <tt class="py-op">&gt;</tt> <tt class="py-name">deadline</tt><tt class="py-op">:</tt> </tt>
+<a name="L194"></a><tt class="py-lineno">194</tt>  <tt class="py-line">                <tt class="py-name">total_tardiness</tt> <tt class="py-op">+=</tt> <tt class="py-name">t_ready</tt> <tt class="py-op">-</tt> <tt class="py-name">deadline</tt> </tt>
+<a name="L195"></a><tt class="py-lineno">195</tt>  <tt class="py-line"> </tt>
+<a name="L196"></a><tt class="py-lineno">196</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">total_tardiness</tt> </tt>
+</div><a name="L197"></a><tt class="py-lineno">197</tt>  <tt class="py-line"> </tt>
+<a name="JspEvaluator._calc_loadbalance"></a><div id="JspEvaluator._calc_loadbalance-def"><a name="L198"></a><tt class="py-lineno">198</tt> <a class="py-toggle" href="#" id="JspEvaluator._calc_loadbalance-toggle" onclick="return toggle('JspEvaluator._calc_loadbalance');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="jspeval.JspEvaluator-class.html#_calc_loadbalance">_calc_loadbalance</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">assignment</tt><tt class="py-op">,</tt> <tt class="py-param">makespan</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="JspEvaluator._calc_loadbalance-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="JspEvaluator._calc_loadbalance-expanded"><a name="L199"></a><tt class="py-lineno">199</tt>  <tt class="py-line">        <tt class="py-docstring">""" Calculated the load balance for the machines in assignment.</tt> </tt>
+<a name="L200"></a><tt class="py-lineno">200</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L201"></a><tt class="py-lineno">201</tt>  <tt class="py-line"><tt class="py-docstring">        @param assignment: the machine assignment to calculate the load balance</tt> </tt>
+<a name="L202"></a><tt class="py-lineno">202</tt>  <tt class="py-line"><tt class="py-docstring">        for.</tt> </tt>
+<a name="L203"></a><tt class="py-lineno">203</tt>  <tt class="py-line"><tt class="py-docstring">        @type assignment: dict</tt> </tt>
+<a name="L204"></a><tt class="py-lineno">204</tt>  <tt class="py-line"><tt class="py-docstring">        @param makespan: the makespan for the schedule. (For load</tt> </tt>
+<a name="L205"></a><tt class="py-lineno">205</tt>  <tt class="py-line"><tt class="py-docstring">        normalization)</tt> </tt>
+<a name="L206"></a><tt class="py-lineno">206</tt>  <tt class="py-line"><tt class="py-docstring">        @type makespan: number</tt> </tt>
+<a name="L207"></a><tt class="py-lineno">207</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L208"></a><tt class="py-lineno">208</tt>  <tt class="py-line"><tt class="py-docstring">        @return: the loadbalance value</tt> </tt>
+<a name="L209"></a><tt class="py-lineno">209</tt>  <tt class="py-line"><tt class="py-docstring">        @rtype: number</tt> </tt>
+<a name="L210"></a><tt class="py-lineno">210</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L211"></a><tt class="py-lineno">211</tt>  <tt class="py-line">        <tt class="py-comment"># sum all production times for every machine</tt> </tt>
+<a name="L212"></a><tt class="py-lineno">212</tt>  <tt class="py-line">        <tt class="py-name">m_prod_times</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-number">0.0</tt> <tt class="py-keyword">for</tt> <tt class="py-name">_</tt> <tt class="py-keyword">in</tt> <tt class="py-name">enumerate</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt class="py-name">machine</tt><tt class="py-op">)</tt><tt class="py-op">]</tt> </tt>
+<a name="L213"></a><tt class="py-lineno">213</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">op_id</tt><tt class="py-op">,</tt> <tt class="py-name">assign</tt> <tt class="py-keyword">in</tt> <tt class="py-name">assignment</tt><tt class="py-op">.</tt><tt class="py-name">items</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L214"></a><tt class="py-lineno">214</tt>  <tt class="py-line">            <tt class="py-name">m_prod_times</tt><tt class="py-op">[</tt><tt class="py-name">assign</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">]</tt> <tt class="py-op">+=</tt>\ </tt>
+<a name="L215"></a><tt class="py-lineno">215</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt class="py-name">job</tt><tt class="py-op">[</tt><tt class="py-name">op_id</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">]</tt><tt class="py-op">.</tt><tt class="py-name">operation</tt><tt class="py-op">[</tt><tt class="py-name">op_id</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">]</tt><tt class="py-op">.</tt><tt class="py-name">op_duration</tt> </tt>
+<a name="L216"></a><tt class="py-lineno">216</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">idx</tt><tt class="py-op">,</tt> <tt class="py-name">time</tt> <tt class="py-keyword">in</tt> <tt class="py-name">enumerate</tt><tt class="py-op">(</tt><tt class="py-name">m_prod_times</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L217"></a><tt class="py-lineno">217</tt>  <tt class="py-line">            <tt class="py-name">m_prod_times</tt><tt class="py-op">[</tt><tt class="py-name">idx</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-name">time</tt><tt class="py-op">/</tt><tt class="py-name">makespan</tt> </tt>
+<a name="L218"></a><tt class="py-lineno">218</tt>  <tt class="py-line">        <tt class="py-comment"># calculate the standard deviation</tt> </tt>
+<a name="L219"></a><tt class="py-lineno">219</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">numpy</tt><tt class="py-op">.</tt><tt class="py-name">std</tt><tt class="py-op">(</tt><tt class="py-name">m_prod_times</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L220"></a><tt class="py-lineno">220</tt>  <tt class="py-line"> </tt>
+<a name="JspEvaluator._calc_wip_and_flow"></a><div id="JspEvaluator._calc_wip_and_flow-def"><a name="L221"></a><tt class="py-lineno">221</tt> <a class="py-toggle" href="#" id="JspEvaluator._calc_wip_and_flow-toggle" onclick="return toggle('JspEvaluator._calc_wip_and_flow');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="jspeval.JspEvaluator-class.html#_calc_wip_and_flow">_calc_wip_and_flow</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">schedule</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="JspEvaluator._calc_wip_and_flow-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="JspEvaluator._calc_wip_and_flow-expanded"><a name="L222"></a><tt class="py-lineno">222</tt>  <tt class="py-line">        <tt class="py-docstring">""" Calculates the maximum WIP (work in process) and the average flow factor.</tt> </tt>
+<a name="L223"></a><tt class="py-lineno">223</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L224"></a><tt class="py-lineno">224</tt>  <tt class="py-line"><tt class="py-docstring">        @param schedule: the schedule to calculate the WIP and flowfactor for.</tt> </tt>
+<a name="L225"></a><tt class="py-lineno">225</tt>  <tt class="py-line"><tt class="py-docstring">        @type schedule: dict</tt> </tt>
+<a name="L226"></a><tt class="py-lineno">226</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L227"></a><tt class="py-lineno">227</tt>  <tt class="py-line"><tt class="py-docstring">        @return: 2 values: max wip, avg flowfactor</tt> </tt>
+<a name="L228"></a><tt class="py-lineno">228</tt>  <tt class="py-line"><tt class="py-docstring">        @rtype: number, number</tt> </tt>
+<a name="L229"></a><tt class="py-lineno">229</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L230"></a><tt class="py-lineno">230</tt>  <tt class="py-line">        <tt class="py-comment"># create a list of all job start- and endtimes and their effects on the</tt> </tt>
+<a name="L231"></a><tt class="py-lineno">231</tt>  <tt class="py-line">        <tt class="py-comment"># WIP</tt> </tt>
+<a name="L232"></a><tt class="py-lineno">232</tt>  <tt class="py-line">        <tt class="py-comment"># use the start- and endtimes to calculate the flow factor for the job</tt> </tt>
+<a name="L233"></a><tt class="py-lineno">233</tt>  <tt class="py-line">        <tt class="py-name">wip_changes</tt> <tt class="py-op">=</tt> <tt class="py-op">{</tt><tt class="py-op">}</tt> </tt>
+<a name="L234"></a><tt class="py-lineno">234</tt>  <tt class="py-line">        <tt class="py-name">flowfactors</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L235"></a><tt class="py-lineno">235</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">job_id</tt><tt class="py-op">,</tt> <tt class="py-name">job</tt> <tt class="py-keyword">in</tt> <tt class="py-name">enumerate</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">model</tt><tt class="py-op">.</tt><tt class="py-name">job</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L236"></a><tt class="py-lineno">236</tt>  <tt class="py-line">            <tt class="py-name">last_op</tt> <tt class="py-op">=</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">job</tt><tt class="py-op">.</tt><tt class="py-name">operation</tt><tt class="py-op">)</tt> <tt class="py-op">-</tt> <tt class="py-number">1</tt> </tt>
+<a name="L237"></a><tt class="py-lineno">237</tt>  <tt class="py-line">            <tt class="py-name">jobstart</tt> <tt class="py-op">=</tt> <tt class="py-name">schedule</tt><tt class="py-op">[</tt><tt class="py-op">(</tt><tt class="py-name">job_id</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> <tt class="py-op">-</tt> <tt class="py-name">job</tt><tt class="py-op">.</tt><tt class="py-name">operation</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">.</tt><tt class="py-name">op_duration</tt> </tt>
+<a name="L238"></a><tt class="py-lineno">238</tt>  <tt class="py-line">            <tt class="py-name">jobend</tt> <tt class="py-op">=</tt> <tt class="py-name">schedule</tt><tt class="py-op">[</tt><tt class="py-op">(</tt><tt class="py-name">job_id</tt><tt class="py-op">,</tt> <tt class="py-name">last_op</tt><tt class="py-op">)</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> </tt>
+<a name="L239"></a><tt class="py-lineno">239</tt>  <tt class="py-line">            <tt class="py-name">production_units</tt> <tt class="py-op">=</tt> <tt class="py-name">job</tt><tt class="py-op">.</tt><tt class="py-name">production_units</tt> </tt>
+<a name="L240"></a><tt class="py-lineno">240</tt>  <tt class="py-line">            <tt class="py-name">wip_changes</tt><tt class="py-op">[</tt><tt class="py-name">jobstart</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-name">production_units</tt> </tt>
+<a name="L241"></a><tt class="py-lineno">241</tt>  <tt class="py-line">            <tt class="py-name">wip_changes</tt><tt class="py-op">[</tt><tt class="py-name">jobend</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-op">-</tt><tt class="py-name">production_units</tt> </tt>
+<a name="L242"></a><tt class="py-lineno">242</tt>  <tt class="py-line"> </tt>
+<a name="L243"></a><tt class="py-lineno">243</tt>  <tt class="py-line">            <tt class="py-comment"># calculate the raw processtime for the job</tt> </tt>
+<a name="L244"></a><tt class="py-lineno">244</tt>  <tt class="py-line">            <tt class="py-name">ptime</tt> <tt class="py-op">=</tt> <tt class="py-name">sum</tt><tt class="py-op">(</tt><tt class="py-op">[</tt><tt class="py-name">op</tt><tt class="py-op">.</tt><tt class="py-name">op_duration</tt> <tt class="py-keyword">for</tt> <tt class="py-name">op</tt> <tt class="py-keyword">in</tt> <tt class="py-name">job</tt><tt class="py-op">.</tt><tt class="py-name">operation</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+<a name="L245"></a><tt class="py-lineno">245</tt>  <tt class="py-line">            <tt class="py-comment"># store the passtimes</tt> </tt>
+<a name="L246"></a><tt class="py-lineno">246</tt>  <tt class="py-line">            <tt class="py-name">flowfactors</tt><tt class="py-op">.</tt><tt class="py-name">append</tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">jobend</tt> <tt class="py-op">-</tt> <tt class="py-name">jobstart</tt><tt class="py-op">)</tt> <tt class="py-op">/</tt> <tt class="py-name">ptime</tt><tt class="py-op">)</tt> </tt>
+<a name="L247"></a><tt class="py-lineno">247</tt>  <tt class="py-line"> </tt>
+<a name="L248"></a><tt class="py-lineno">248</tt>  <tt class="py-line">        <tt class="py-comment"># go through the wip changes in order and record the max occuring WIP</tt> </tt>
+<a name="L249"></a><tt class="py-lineno">249</tt>  <tt class="py-line">        <tt class="py-name">max_wip</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt> </tt>
+<a name="L250"></a><tt class="py-lineno">250</tt>  <tt class="py-line">        <tt class="py-name">curr_wip</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt> </tt>
+<a name="L251"></a><tt class="py-lineno">251</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">_</tt><tt class="py-op">,</tt> <tt class="py-name">change</tt> <tt class="py-keyword">in</tt> <tt class="py-name">sorted</tt><tt class="py-op">(</tt><tt class="py-name">wip_changes</tt><tt class="py-op">.</tt><tt class="py-name">items</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L252"></a><tt class="py-lineno">252</tt>  <tt class="py-line">            <tt class="py-name">curr_wip</tt> <tt class="py-op">+=</tt> <tt class="py-name">change</tt> </tt>
+<a name="L253"></a><tt class="py-lineno">253</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">curr_wip</tt> <tt class="py-op">&gt;</tt> <tt class="py-name">max_wip</tt><tt class="py-op">:</tt> </tt>
+<a name="L254"></a><tt class="py-lineno">254</tt>  <tt class="py-line">                <tt class="py-name">max_wip</tt> <tt class="py-op">=</tt> <tt class="py-name">curr_wip</tt> </tt>
+<a name="L255"></a><tt class="py-lineno">255</tt>  <tt class="py-line"> </tt>
+<a name="L256"></a><tt class="py-lineno">256</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">max_wip</tt><tt class="py-op">,</tt> <tt class="py-name">numpy</tt><tt class="py-op">.</tt><tt class="py-name">average</tt><tt class="py-op">(</tt><tt class="py-name">flowfactors</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L257"></a><tt class="py-lineno">257</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="https://github.com/mYstar/JSPEval">JspEval</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Jul 21 17:10:19 2016
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

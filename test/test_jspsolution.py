@@ -1,6 +1,8 @@
+""" Tests for the JspSolution class.
+"""
 import pytest
 from jspsolution import JspSolution
-from conftest import isclose
+from test.conftest import isclose
 
 
 @pytest.mark.parametrize("index,expected", [
@@ -10,7 +12,6 @@ from conftest import isclose
     (3, 2),
     pytest.mark.xfail(raises=IndexError)((4, None)),
 ])
-@pytest.mark.usefixtures("model")
 def test_determine_machine(model, index, expected):
     solution = JspSolution(model, [0.1, 0.4, 0.9, 0.2])
     assert solution.get_machine_assignment(int(index)) == expected
@@ -28,7 +29,6 @@ def test_determine_machine(model, index, expected):
     (0.82, 8),
     (0.98, 9),
 ])
-@pytest.mark.usefixtures("model_10machines")
 def test_determine_10machine(model_10machines, value, expected):
     solution = JspSolution(model_10machines, [value])
     assert solution.get_machine_assignment(0) == expected
@@ -42,7 +42,6 @@ def test_determine_10machine(model_10machines, value, expected):
     (2, 0.61),
     (3, 0.98*2-1),
 ])
-@pytest.mark.usefixtures("model")
 def test_prioritiy(model, index, expected):
     solution = JspSolution(model, [0.03, 0.33, 0.61, 0.98])
     assert isclose(solution.get_priority(index), expected)
@@ -60,25 +59,22 @@ def test_prioritiy(model, index, expected):
     (0.82, 0.2),
     (0.98, 0.8),
 ])
-@pytest.mark.usefixtures("model_10machines")
 def test_priority_10machine(
-    model_10machines,
-    value,
-    expected
+        model_10machines,
+        value,
+        expected
 ):
     solution = JspSolution(
-      model_10machines,
-      [value])
+        model_10machines,
+        [value])
     assert isclose(solution.get_priority(0), expected)
 
 
 @pytest.mark.xfail(raises=ValueError)
-@pytest.mark.usefixtures("model")
 def test_do_not_allow_negative_allel(model):
     JspSolution(model, [-0.03, 0.33, 0.61, 0.98])
 
 
 @pytest.mark.xfail(raises=ValueError)
-@pytest.mark.usefixtures("model")
 def test_do_not_allow_allel_over_1(model):
     JspSolution(model, [1.03, 0.33, 0.61, 0.98])
