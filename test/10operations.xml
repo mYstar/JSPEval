@@ -18,7 +18,7 @@
   <job job_id="j01">
     <starttime>0.0</starttime>
     <deadline>25.0</deadline>
-    <production_units>1</production_units>
+    <lotsize>1</lotsize>
     <operation operation_id="o1">
       <op_duration>5.0</op_duration>
       <allowed_machine>001</allowed_machine>
@@ -45,7 +45,7 @@
   <job job_id="j02">
     <starttime>10.0</starttime>
     <deadline>80.0</deadline>
-    <production_units>2</production_units>
+    <lotsize>2</lotsize>
     <operation operation_id="o21">
       <op_duration>15.0</op_duration>
       <allowed_machine>001</allowed_machine>
@@ -79,7 +79,7 @@
   <job job_id="j03">
     <starttime>20.0</starttime>
     <deadline>50.0</deadline>
-    <production_units>3</production_units>
+    <lotsize>3</lotsize>
     <operation operation_id="o31">
       <op_duration>15.0</op_duration>
       <allowed_machine>001</allowed_machine>

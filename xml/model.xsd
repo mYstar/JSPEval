@@ -14,10 +14,10 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- production_units are a number of resources that are used in the
+  <!-- lotsize are a number of resources that are used in the
   production of a job. These are used as measurement units for WIP calculation.
   -->
-  <xs:simpleType name="t_production_units">
+  <xs:simpleType name="t_lotsize">
     <xs:restriction base="xs:integer">
       <xs:minInclusive value="0"/>
     </xs:restriction>
@@ -107,7 +107,7 @@
       <xs:sequence>
         <xs:element name="starttime" type="t_starttime"/>
         <xs:element name="deadline" type="t_deadline"/>
-        <xs:element name="production_units" type="t_production_units"/>
+        <xs:element name="lotsize" type="t_lotsize"/>
         <xs:element ref="operation" maxOccurs="unbounded"/>
       </xs:sequence>
       <xs:attribute name="job_id" type="xs:string"/>

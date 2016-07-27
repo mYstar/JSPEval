@@ -236,9 +236,9 @@ class JspEvaluator:
             last_op = len(job.operation) - 1
             jobstart = schedule[(job_id, 0)][1] - job.operation[0].op_duration
             jobend = schedule[(job_id, last_op)][1]
-            production_units = job.production_units
-            wip_changes[jobstart] = production_units
-            wip_changes[jobend] = -production_units
+            lotsize = job.lotsize
+            wip_changes[jobstart] = lotsize
+            wip_changes[jobend] = -lotsize
 
             # calculate the raw processtime for the job
             ptime = sum([op.op_duration for op in job.operation])
