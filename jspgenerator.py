@@ -1,23 +1,30 @@
 """Used to generate a valid xml-file to use in the JspEvaluator
 """
 import sys
-from lxml import etree
+import os
+import getopt
+import numpy
 from numpy import random
+from lxml import etree
 import ruamel.yaml
+
+
+XML_HEADER = '<?xml version="1.0" encoding="UTF-8" ?>'
 
 
 def read_yaml(filename):
     """Reads a YAML file and generates a parameter dictionary from it.
 
     :filename: the name (and possibly the path) of the file to process.
-    :returns: a dictionary with all parameters contained in the file.
+    :returns: the raw file content and a dictionary with all parameters
+    contained in the file.
     by the file.
     """
     try:
         file = open(filename, "r")
         content = file.read()
 
-        return ruamel.yaml.load(content, ruamel.yaml.RoundTripLoader)
+        return content, ruamel.yaml.load(content, ruamel.yaml.RoundTripLoader)
     except IOError:
         print("The file: ", filename, " could not be opened.", sep="")
     except ruamel.yaml.parser.ParserError:
@@ -68,7 +75,7 @@ def validate(params):
     return True
 
 
-def generate_xmltree(params):
+def generate_xmltree(params, seed):
     """Generates a xml-tree that represents a jspmodel, that is randomly
     generated in the limits of the parameters.
 
@@ -76,6 +83,9 @@ def generate_xmltree(params):
     :returns: an objectified xml-tree
 
     """
+    # set the seed
+    random.seed(seed)
+
     # intialize an element factory
     root = etree.Element(
         "jsp-model",
@@ -125,6 +135,14 @@ def generate_jobs(root, params, machines):
         jname = "j{}".format(jnum)
         e_job = etree.SubElement(root, "job", job_id=jname)
 
+        # starttime element
+        etree.SubElement(e_job, "starttime")
+        # create deadline element
+        e_deadl = etree.SubElement(e_job, "deadline")
+        # generate the lotsize
+        lotsize = random.randint(1, params["lotsize"] + 1)
+        etree.SubElement(e_job, "lotsize").text = str(lotsize)
+
         # generate operations
         joblengths[jname] = generate_operations(e_job, jnum, params, machines)
 
@@ -133,17 +151,13 @@ def generate_jobs(root, params, machines):
         dmax = (1 + params["deadline"][1]) * joblengths[jname]
         deadline = random.rand() * (dmax - dmin) + dmin
 
-        etree.SubElement(e_job, "deadline").text = "{:.2f}".format(deadline)
-
-        # generate the lotsize
-        lotsize = random.randint(1, params["lotsize"] + 1)
-        etree.SubElement(e_job, "lotsize").text = str(lotsize)
+        e_deadl.text = "{:.2f}".format(deadline)
 
     # generate the starting times
     max_jobduration = max(joblengths.values())
     for e_job in root.iter("job"):
         starttime = random.rand() * params["release_time"] * max_jobduration
-        etree.SubElement(e_job, "starttime").text = "{:.2f}".format(starttime)
+        e_job.find('starttime').text = "{:.2f}".format(starttime)
 
     return root
 
@@ -191,20 +205,78 @@ def generate_operations(e_job, jnum, params, machines):
     return job_duration
 
 
+def get_yaml_files(directory):
+    """Looks for YAML files in a particular directory.
+
+    :directory: the directory to be searched for YAML files.
+    :returns: a list of all YAML files in directory
+
+    """
+    yaml_files = []
+    for file in os.listdir(directory):
+        if file.endswith(".yaml"):
+            yaml_files.append("{}/{}".format(directory, file))
+
+    return yaml_files
+
+
 def main():
     """controls the generation of the xml-file(s).
+
     :returns: None
 
     """
-    if len(sys.argv) == 0:
-        print("usage: python3 jspgenerator.py <parameters.yaml, ...>")
+    # read the given parameters
+    try:
+        options, files = getopt.getopt(
+            sys.argv[1:],
+            "hds:o:",
+            ["help", "use-directories", "seed=", "output-dir="])
+    except getopt.GetoptError:
+        print("usage: python3 jspgenerator.py",
+              "[-h, -d, -s, -o] <parameters.yaml, ...>")
+        sys.exit(1)
+
+    # generate seed (this is max uint32)
+    seed = random.randint(4294967295)
+
+    # set the source dir as the output dir
+    if ('-d', '') in options:
+        output_dir = files[0]
+    else:
+        output_dir = os.path.dirname(files[0])
+
+    for opt, arg in options:
+        if opt in ("-h", "--help"):
+            print("usage: python3 jspgenerator.py",
+                  "[-h, -d, -s, -o] <parameters.yaml, ...>")
+            sys.exit()
+        elif opt in ("-d", "--use-directory"):
+            files = get_yaml_files(files[0])
+        elif opt in ("-s", "--seed"):
+            seed = numpy.uint32(arg)
+        elif opt in ("-o", "--output-dir"):
+            output_dir = arg
 
     # iterate over all parameter files
-    for param_file in sys.argv[1:]:
-        param = read_yaml(param_file)
+    for param_file in files:
+        # get the parameters
+        paramstring, param = read_yaml(param_file)
         validate(param)
-        xmltree = generate_xmltree(param)
-        print(etree.tostring(xmltree, pretty_print=True).decode("utf8"))
+
+        # generate the xml
+        xmltree = generate_xmltree(param, seed)
+
+        # write the result
+        out_filename = "{}/{}.xml".format(
+            output_dir,
+            param_file.split('.')[0].split('/')[-1])
+        out_file = open(out_filename, "w")
+        out_file.write("{}\n<!--\nseed: {}\n{}\n-->\n{}".format(
+            XML_HEADER,
+            seed,
+            paramstring,
+            etree.tostring(xmltree, pretty_print=True).decode("utf8")))
 
 
 if __name__ == "__main__":
