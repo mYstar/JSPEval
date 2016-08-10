@@ -1,6 +1,7 @@
 """ Tests for the JspModel class.
 """
 import pytest
+from jspmodel import JspModel
 
 
 def test_random_solution_length(rand_solution):
@@ -73,3 +74,15 @@ def test_translate_global_index(model, index, expected):
 ])
 def test_setuptimes(model, from_, to_, expected):
     assert model.get_setuptime(from_, to_) == expected
+
+
+def test_read_compressed_file(model):
+    comp_model = JspModel("xml/example.xml.gz")
+    assert comp_model == model
+
+
+def test_equality_operator(model):
+    assert model == JspModel("xml/example.xml")
+    assert not model != JspModel("xml/example.xml")
+    assert model != JspModel("test/10operations.xml")
+    assert not model == JspModel("test/10operations.xml")

@@ -3,6 +3,7 @@
 import sys
 import os
 import getopt
+import gzip
 import numpy
 from numpy import random
 from lxml import etree
@@ -230,11 +231,11 @@ def main():
     try:
         options, files = getopt.getopt(
             sys.argv[1:],
-            "hds:o:",
-            ["help", "use-directories", "seed=", "output-dir="])
+            "hdcs:o:",
+            ["help", "compression", "use-directories", "seed=", "output-dir="])
     except getopt.GetoptError:
         print("usage: python3 jspgenerator.py",
-              "[-h, -d, -s, -o] <parameters.yaml, ...>")
+              "-[hdsoc] <parameters.yaml, ...>")
         sys.exit(1)
 
     # generate seed (this is max uint32)
@@ -246,10 +247,13 @@ def main():
     else:
         output_dir = os.path.dirname(files[0])
 
+    # compression flag
+    compression = False
+
     for opt, arg in options:
         if opt in ("-h", "--help"):
             print("usage: python3 jspgenerator.py",
-                  "[-h, -d, -s, -o] <parameters.yaml, ...>")
+                  "-[hdsoc] <parameters.yaml, ...>")
             sys.exit()
         elif opt in ("-d", "--use-directory"):
             files = get_yaml_files(files[0])
@@ -257,6 +261,8 @@ def main():
             seed = numpy.uint32(arg)
         elif opt in ("-o", "--output-dir"):
             output_dir = arg
+        elif opt in ("-c", "--compression"):
+            compression = True
 
     # iterate over all parameter files
     for param_file in files:
@@ -271,12 +277,21 @@ def main():
         out_filename = "{}/{}.xml".format(
             output_dir,
             param_file.split('.')[0].split('/')[-1])
-        out_file = open(out_filename, "w")
-        out_file.write("{}\n<!--\nseed: {}\n{}\n-->\n{}".format(
+
+        content = "{}\n<!--\nseed: {}\n{}\n-->\n{}".format(
             XML_HEADER,
             seed,
             paramstring,
-            etree.tostring(xmltree, pretty_print=True).decode("utf8")))
+            etree.tostring(xmltree, pretty_print=True).decode("utf8"))
+
+        if compression:
+            out_filename = "{}.gz".format(out_filename)
+            out_file = gzip.open(out_filename, "wb")
+            content = content.encode()
+        else:
+            out_file = open(out_filename, "w")
+
+        out_file.write(content)
 
 
 if __name__ == "__main__":

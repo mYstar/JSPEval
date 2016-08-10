@@ -2,6 +2,7 @@
 and shares utility functions to the outside. Also shares the objectified view
 on the xml model.
 """
+import gzip
 from lxml import etree
 from lxml import objectify
 from jspsolution import JspSolution
@@ -15,7 +16,7 @@ class JspModel:
     setuptimes for the operations (get_setuptime()).
     """
 
-    def __init__(self, schemafile="xml/example.xml"):
+    def __init__(self, filename="xml/example.xml"):
         """
         Takes the xml-File, that describes the model and builds all necessary
         datastructures.
@@ -25,7 +26,12 @@ class JspModel:
         parser = objectify.makeparser(schema=schema)
 
         # read the model and build objects from it
-        self.model = objectify.parse(open(schemafile, "r"), parser).getroot()
+        if filename.endswith(".gz"):
+            modelfile = gzip.open(filename, 'r')
+        else:
+            modelfile = open(filename, 'r')
+
+        self.model = objectify.parse(modelfile, parser).getroot()
         # prebuild the index translation list
         self.index_translation_list = self._create_index_translation_list()
         # provide a translated list of the allowed machines for every operation
@@ -155,3 +161,48 @@ class JspModel:
             return self.setuptimes[op_tuple]
         else:
             return 0.0
+
+    def __eq__(self, other):
+        """Implements a comparison of 2 JspModels.
+
+        :other: the JspModel to compare to.
+        :returns: a boolean value, True if the models are equal from a xml
+        standpoint
+
+        """
+        return _xmleq(self.model, other.model)
+
+    def __ne__(self, other):
+        """Implements a comparison of 2 JspModels.
+
+        :other: the JspModel to compare to.
+        :returns: a boolean value, False if the models are equal from a xml
+        standpoint
+
+        """
+        return not _xmleq(self.model, other.model)
+
+
+def _xmleq(elem1, elem2):
+    """Compares 2 objectified lxml elements.
+
+    :elem1: first element of the comparison
+    :elem2: second element of the comparison
+    :returns: boolean value, True if the elements are equal from an xml
+    standpoint
+
+    """
+    if elem1.tag != elem2.tag or elem1.attrib != elem2.attrib:
+        return False
+    if elem1.text != elem2.text or elem1.tail != elem2.tail:
+        return False
+    if len(elem1) != len(elem2):
+        return False
+
+    for subel1, subel2 in zip(
+            elem1.iterchildren(tag=etree.Element),
+            elem2.iterchildren(tag=etree.Element)):
+        if not _xmleq(subel1, subel2):
+            return False
+
+    return True
