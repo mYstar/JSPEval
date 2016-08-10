@@ -1,0 +1,9 @@
+machines: 5
+jobs: 100
+release_time: 0.5
+deadline: [0.5, 1.0]
+lotsize: 10
+operations: [10, 10]
+duration: [5.0, 35.0]
+allowed_machines: [2, 5]
+setuptimes: [0.0, 5.0]
