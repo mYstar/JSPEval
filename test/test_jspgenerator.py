@@ -61,7 +61,7 @@ def test_invalidates_wrong_parameters(filename):
 def test_model_is_generated_correctly(example_xml):
     for _ in range(10):
         seed = random.randint(4294967295)
-        root = jspgenerator.generate_xmltree(example_xml, seed)
+        root = jspgenerator.generate_random_xmltree(example_xml, seed)
         o_root = objectify.fromstring(etree.tostring(root))
 
         assert len(o_root.machine) == 5
@@ -94,3 +94,52 @@ def test_model_is_generated_correctly(example_xml):
             assert float(o_job.starttime.text) <= 0.5 * max_joblen
 
         assert len(o_root.setuptimes.setuptime) == jobcount * jobcount
+
+
+def test_convert_peres_fileformat():
+
+    params = jspgenerator.read_peres("test/peres.txt")
+    root = jspgenerator.generate_peres_xmltree(params)
+    o_root = objectify.fromstring(etree.tostring(root))
+
+    assert len(o_root.job) == 3
+    assert len(o_root.machine) == 3
+    assert not hasattr(o_root.setuptimes, 'setuptime')
+
+    # check the jobs
+    assert int(o_root.job[0].starttime) == 0
+    assert int(o_root.job[1].starttime) == 5
+    assert int(o_root.job[2].starttime) == 10
+
+    assert int(o_root.job[0].deadline) == 10
+    assert int(o_root.job[1].deadline) == 15
+    assert int(o_root.job[2].deadline) == 20
+
+    assert int(o_root.job[0].lotsize) == 1
+    assert int(o_root.job[1].lotsize) == 2
+    assert int(o_root.job[2].lotsize) == 3
+
+    assert len(o_root.job[0].operation) == 3
+    assert len(o_root.job[1].operation) == 3
+    assert len(o_root.job[2].operation) == 3
+
+    assert float(o_root.job[0].operation[0].op_duration) == 2.0
+    assert o_root.job[0].operation[0].allowed_machine == 'm0'
+    assert float(o_root.job[0].operation[1].op_duration) == 3.0
+    assert o_root.job[0].operation[1].allowed_machine == 'm1'
+    assert float(o_root.job[0].operation[2].op_duration) == 2.0
+    assert o_root.job[0].operation[2].allowed_machine == 'm2'
+
+    assert float(o_root.job[1].operation[0].op_duration) == 1.5
+    assert o_root.job[1].operation[0].allowed_machine == 'm2'
+    assert float(o_root.job[1].operation[1].op_duration) == 2.5
+    assert o_root.job[1].operation[1].allowed_machine == 'm1'
+    assert float(o_root.job[1].operation[2].op_duration) == 3.5
+    assert o_root.job[1].operation[2].allowed_machine == 'm0'
+
+    assert float(o_root.job[2].operation[0].op_duration) == 1.1
+    assert o_root.job[2].operation[0].allowed_machine == 'm1'
+    assert float(o_root.job[2].operation[1].op_duration) == 1.2
+    assert o_root.job[2].operation[1].allowed_machine == 'm0'
+    assert float(o_root.job[2].operation[2].op_duration) == 1.3
+    assert o_root.job[2].operation[2].allowed_machine == 'm2'

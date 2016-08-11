@@ -19,7 +19,6 @@ def read_yaml(filename):
     :filename: the name (and possibly the path) of the file to process.
     :returns: the raw file content and a dictionary with all parameters
     contained in the file.
-    by the file.
     """
     try:
         file = open(filename, "r")
@@ -30,6 +29,24 @@ def read_yaml(filename):
         print("The file: ", filename, " could not be opened.", sep="")
     except ruamel.yaml.parser.ParserError:
         print("The file: ", filename, " is no valid yaml file.", sep="")
+
+
+def read_peres(filename):
+    """Reads a file in the Dauzere Peres et. al format and generates a
+    list of value-lists from it.
+
+    :filename: the name (and possibly the path) of the file to process.
+    :returns: a list containing a list of all values for every line in the
+    file.
+    """
+    try:
+        values = []
+        for line in open(filename, "r"):
+            values.append(line.split(' ')[:-1])
+
+        return values
+    except IOError:
+        print("The file: ", filename, " could not be opened.", sep="")
 
 
 def validate(params):
@@ -76,11 +93,12 @@ def validate(params):
     return True
 
 
-def generate_xmltree(params, seed):
+def generate_random_xmltree(params, seed):
     """Generates a xml-tree that represents a jspmodel, that is randomly
     generated in the limits of the parameters.
 
     :params: a dictionary, that contains all the parameters
+    :seed: the seed to use for the RNG
     :returns: an objectified xml-tree
 
     """
@@ -117,6 +135,62 @@ def generate_xmltree(params, seed):
             setuptime = random.rand() * (smax - smin) + smin
             etree.SubElement(e_st, "setup_duration").text = \
                 "{:.2f}".format(setuptime)
+
+    return root
+
+
+def generate_peres_xmltree(params):
+    """Generates a xml-tree that represents a jspmodel, that is build from the
+    parameters in peres et al format.
+
+    :params: a list, that contains all the parameters
+    :returns: an objectified xml-tree
+
+    """
+    # intialize an element factory
+    root = etree.Element(
+        "jsp-model",
+        xmlns="http://www.htw-dresden.de/JSPeval",
+        nsmap={"xsi": "http://www.w3.org/2001/XMLSchema-instance"})
+
+    # generate the machines
+    machines = []
+    for mnum in range(int(params[0][1])):
+        mname = "m{}".format(mnum)
+        etree.SubElement(root, "machine", machine_id=mname)
+        machines.append(mname)
+
+    # generate jobs
+    for jnum in range(int(params[0][0])):
+        jname = "j{}".format(jnum)
+        e_job = etree.SubElement(root, "job", job_id=jname)
+
+        # starttime element
+        etree.SubElement(e_job, "starttime").text = params[jnum + 1][0]
+        # create deadline element
+        etree.SubElement(e_job, "deadline").text = params[jnum + 1][1]
+        # generate the lotsize
+        etree.SubElement(e_job, "lotsize").text = params[jnum + 1][2]
+
+        # operations
+        for onum in range(int(params[jnum + 1][3])):
+            e_op = etree.SubElement(
+                e_job,
+                "operation",
+                operation_id="j{}_o{}".format(jnum, onum))
+
+            # generate op duration
+            etree.SubElement(e_op, "op_duration").text = \
+                params[jnum + 1][onum * 2 + 5]
+
+            # allowed machine
+            etree.SubElement(
+                e_op,
+                "allowed_machine"
+                ).text = machines[int(params[jnum + 1][onum * 2 + 4]) - 1]
+
+    # generate setuptimes
+    etree.SubElement(root, "setuptimes")
 
     return root
 
@@ -271,7 +345,7 @@ def main():
         validate(param)
 
         # generate the xml
-        xmltree = generate_xmltree(param, seed)
+        xmltree = generate_random_xmltree(param, seed)
 
         # write the result
         out_filename = "{}/{}.xml".format(
