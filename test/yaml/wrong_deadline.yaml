@@ -2,6 +2,7 @@ machines: 5
 jobs: 4
 release_time: 0.5
 deadline: [1.5, 1.0]
+weight: [0.5, 2.0]
 lotsize: 10
 operations: [2, 5]
 duration: [5.0, 35.0]

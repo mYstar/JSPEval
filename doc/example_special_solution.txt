@@ -1,6 +1,7 @@
 | operations | (0, 0) | (0, 1) | (1, 0) | (1, 1) |
 | starttime  | 0.0    |        | 10.0   |        |
 | deadline   | 25.0   |        | 50.0   |        |
+| weight     | 1.0    |        | 1.5    |        |
 | duration   | 5.0    | 15.0   | 15.0   | 15.0   |
 | allowed m. | 001    | 003    | 002    | 003    |
 |            | 002    | 002    |        | 001    |
@@ -27,10 +28,10 @@ production:
 makespan: 57.5
 
 tardiness:
-| Job | tardiness |
-| 0   | 32.5      |
-| 1   | 0.0       |
-| sum | 32.5      |
+| Job  | tardiness | weight |
+| 0    | 32.5      | 1.0    |
+| 1    | 0.0       | 1.5    |
+| wsum |           | 32.5   |
 
 load:
 | machine | load  |

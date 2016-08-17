@@ -17,6 +17,7 @@
   <job job_id="j01">
     <starttime>0.0</starttime>
     <deadline>25.0</deadline>
+    <weight>1.0</weight>
     <lotsize>1</lotsize>
     <operation operation_id="o1">
       <op_duration>5.0</op_duration>
@@ -33,6 +34,7 @@
   <job job_id="j02">
     <starttime>10.0</starttime>
     <deadline>50.0</deadline>
+    <weight>1.5</weight>
     <lotsize>1</lotsize>
     <operation operation_id="o21">
       <op_duration>15.0</op_duration>

@@ -13,6 +13,18 @@ import ruamel.yaml
 XML_HEADER = '<?xml version="1.0" encoding="UTF-8" ?>'
 
 
+def randfloat(xmin, xmax):
+    """Generates a random float number between xmin (inclusive) and xmax
+    (exclusive).
+
+    :xmin: lower end of the random interval
+    :xmax: higher end of the random interval
+    :returns: a random float number
+
+    """
+    return random.rand() * (xmax - xmin) + xmin
+
+
 def read_yaml(filename):
     """Reads a YAML file and generates a parameter dictionary from it.
 
@@ -58,7 +70,7 @@ def validate(params):
 
     """
     # greater or equal 0
-    gezero = ["release_time", "deadline", "duration", "setuptimes"]
+    gezero = ["weight", "release_time", "deadline", "duration", "setuptimes"]
     for pname in gezero:
         try:
             if params[pname] < 0:
@@ -79,7 +91,7 @@ def validate(params):
 
     # greater or equal to previous value
     geprev = ["operations", "duration", "allowed_machines",
-              "setuptimes", "deadline"]
+              "weight", "setuptimes", "deadline"]
     for pname in geprev:
         if params[pname][0] > params[pname][1]:
             raise ValueError("Parameter: {} has wrong ordered values."
@@ -130,9 +142,9 @@ def generate_random_xmltree(params, seed):
                 e_op1.attrib["operation_id"]
             etree.SubElement(e_st, "to_operation").text = \
                 e_op2.attrib["operation_id"]
-            smin = params["setuptimes"][0]
-            smax = params["setuptimes"][1]
-            setuptime = random.rand() * (smax - smin) + smin
+            setuptime = randfloat(
+                params["setuptimes"][0],
+                params["setuptimes"][1])
             etree.SubElement(e_st, "setup_duration").text = \
                 "{:.2f}".format(setuptime)
 
@@ -169,8 +181,10 @@ def generate_peres_xmltree(params):
         etree.SubElement(e_job, "starttime").text = params[jnum + 1][0]
         # create deadline element
         etree.SubElement(e_job, "deadline").text = params[jnum + 1][1]
+        # generate the weight
+        etree.SubElement(e_job, "weight").text = params[jnum + 1][2]
         # generate the lotsize
-        etree.SubElement(e_job, "lotsize").text = params[jnum + 1][2]
+        etree.SubElement(e_job, "lotsize").text = "1"
 
         # operations
         for onum in range(int(params[jnum + 1][3])):
@@ -214,6 +228,11 @@ def generate_jobs(root, params, machines):
         etree.SubElement(e_job, "starttime")
         # create deadline element
         e_deadl = etree.SubElement(e_job, "deadline")
+        # generate the weight
+        weight = randfloat(
+            params["weight"][0],
+            params["weight"][1])
+        etree.SubElement(e_job, "weight").text = str(weight)
         # generate the lotsize
         lotsize = random.randint(1, params["lotsize"] + 1)
         etree.SubElement(e_job, "lotsize").text = str(lotsize)
@@ -224,7 +243,7 @@ def generate_jobs(root, params, machines):
         # generate the deadline
         dmin = (1 + params["deadline"][0]) * joblengths[jname]
         dmax = (1 + params["deadline"][1]) * joblengths[jname]
-        deadline = random.rand() * (dmax - dmin) + dmin
+        deadline = randfloat(dmin, dmax)
 
         e_deadl.text = "{:.2f}".format(deadline)
 
@@ -257,9 +276,9 @@ def generate_operations(e_job, jnum, params, machines):
             operation_id="j{}_o{}".format(jnum, onum))
 
         # generate op duration
-        dmin = params["duration"][0]
-        dmax = params["duration"][1]
-        duration = random.rand() * (dmax - dmin) + dmin
+        duration = randfloat(
+            params["duration"][0],
+            params["duration"][1])
         etree.SubElement(e_op, "op_duration").text = \
             "{:.2f}".format(duration)
 
@@ -295,49 +314,16 @@ def get_yaml_files(directory):
     return yaml_files
 
 
-def main():
-    """controls the generation of the xml-file(s).
+def process_yaml(files, output_dir, seed, compression):
+    """processes all the steps to generate models from the yaml-files.
 
+    :files: the yaml files containing the parameters
+    :output_dir: the directory to output the models to
+    :seed: the seed to use
+    :compression: flag - whether to use compression for the output files
     :returns: None
 
     """
-    # read the given parameters
-    try:
-        options, files = getopt.getopt(
-            sys.argv[1:],
-            "hdcs:o:",
-            ["help", "compression", "use-directories", "seed=", "output-dir="])
-    except getopt.GetoptError:
-        print("usage: python3 jspgenerator.py",
-              "-[hdsoc] <parameters.yaml, ...>")
-        sys.exit(1)
-
-    # generate seed (this is max uint32)
-    seed = random.randint(4294967295)
-
-    # set the source dir as the output dir
-    if ('-d', '') in options:
-        output_dir = files[0]
-    else:
-        output_dir = os.path.dirname(files[0])
-
-    # compression flag
-    compression = False
-
-    for opt, arg in options:
-        if opt in ("-h", "--help"):
-            print("usage: python3 jspgenerator.py",
-                  "-[hdsoc] <parameters.yaml, ...>")
-            sys.exit()
-        elif opt in ("-d", "--use-directory"):
-            files = get_yaml_files(files[0])
-        elif opt in ("-s", "--seed"):
-            seed = numpy.uint32(arg)
-        elif opt in ("-o", "--output-dir"):
-            output_dir = arg
-        elif opt in ("-c", "--compression"):
-            compression = True
-
     # iterate over all parameter files
     for param_file in files:
         # get the parameters
@@ -366,6 +352,99 @@ def main():
             out_file = open(out_filename, "w")
 
         out_file.write(content)
+
+
+def convert_peres(files, output_dir, compression):
+    """converts the peres et al formatted files to the xml format.
+
+    :files: the peres files containing the model parameters
+    :output_dir: the directory to output the models to
+    :compression: flag - whether to use compression for the output files
+    :returns: None
+
+    """
+    # iterate over all peres files
+    for peres_file in files:
+        # get the values
+        values = read_peres(peres_file)
+
+        # generate the xml
+        xmltree = generate_peres_xmltree(values)
+
+        # write the result
+        out_filename = "{}/{}.xml".format(
+            output_dir,
+            peres_file.split('.')[0].split('/')[-1])
+
+        content = "{}\n{}".format(
+            XML_HEADER,
+            etree.tostring(xmltree, pretty_print=True).decode("utf8"))
+
+        if compression:
+            out_filename = "{}.gz".format(out_filename)
+            out_file = gzip.open(out_filename, "wb")
+            content = content.encode()
+        else:
+            out_file = open(out_filename, "w")
+
+        out_file.write(content)
+
+
+def main():
+    """controls the generation of the xml-file(s).
+
+    :returns: None
+
+    """
+    usage_string = \
+        "usage: python3 jspgenerator.py-[hdsocf] <parameters.yaml, ...>"
+
+    # read the given parameters
+    try:
+        options, files = getopt.getopt(
+            sys.argv[1:],
+            "hdcs:o:f:",
+            ["help", "compression", "use-directories",
+             "seed=", "output-dir=", "format="])
+    except getopt.GetoptError:
+        print(usage_string)
+        sys.exit(1)
+
+    # generate seed (this is max uint32)
+    seed = random.randint(4294967295)
+
+    # set the source dir as the output dir
+    if ('-d', '') in options:
+        output_dir = files[0]
+    else:
+        output_dir = os.path.dirname(files[0])
+
+    # compression flag
+    compression = False
+
+    # default format
+    fmt = "yaml"
+
+    for opt, arg in options:
+        if opt in ("-h", "--help"):
+            print(usage_string)
+            sys.exit()
+        elif opt in ("-d", "--use-directory"):
+            files = get_yaml_files(files[0])
+        elif opt in ("-s", "--seed"):
+            seed = numpy.uint32(arg)
+        elif opt in ("-o", "--output-dir"):
+            output_dir = arg
+        elif opt in ("-c", "--compression"):
+            compression = True
+        elif opt in ("-f", "--format"):
+            if arg == "peres":
+                fmt = arg
+
+    if fmt == "peres":
+        convert_peres(files, output_dir, compression)
+    else:
+        process_yaml(files, output_dir, seed, compression)
 
 
 if __name__ == "__main__":

@@ -18,6 +18,7 @@
   <job job_id="j0">
     <starttime>0.0</starttime>
     <deadline>30.0</deadline>
+    <weight>1.5</weight>
     <lotsize>2</lotsize>
     <operation operation_id="o00">
       <op_duration>7.0</op_duration>
@@ -34,6 +35,7 @@
   <job job_id="j1">
     <starttime>15.0</starttime>
     <deadline>150.0</deadline>
+    <weight>1.0</weight>
     <lotsize>1</lotsize>
     <operation operation_id="o10">
       <op_duration>15.0</op_duration>
@@ -69,6 +71,7 @@
   <job job_id="j2">
     <starttime>30.0</starttime>
     <deadline>100.0</deadline>
+    <weight>2.0</weight>
     <lotsize>5</lotsize>
     <operation operation_id="o20">
       <op_duration>15.0</op_duration>
@@ -92,6 +95,7 @@
   <job job_id="j3">
     <starttime>50.0</starttime>
     <deadline>65.0</deadline>
+    <weight>1.0</weight>
     <lotsize>4</lotsize>
     <operation operation_id="o30">
       <op_duration>5.0</op_duration>
@@ -105,6 +109,7 @@
   <job job_id="j4">
     <starttime>5.0</starttime>
     <deadline>80.0</deadline>
+    <weight>0.5</weight>
     <lotsize>2</lotsize>
     <operation operation_id="o40">
       <op_duration>30.0</op_duration>

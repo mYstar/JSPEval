@@ -134,7 +134,7 @@ class JspEvaluator:
         """
         Calculates the following metrics:
             - makespan
-            - total tardiness
+            - total weighted tardiness
             - load balance
             - setup time
             - max wip
@@ -152,7 +152,7 @@ class JspEvaluator:
         makespan = max(schedule.values(), key=lambda x: x[1])[1]
 
         # calculate tardiness
-        total_tardiness = self._calc_tardiness(schedule)
+        twt = self._calc_tardiness(schedule)
 
         # calculate the loadbalance
         loadbalance = self._calc_loadbalance(assignment, makespan)
@@ -168,7 +168,7 @@ class JspEvaluator:
                 "load balance": loadbalance,
                 "max wip": wip,
                 "avg flowfactor": flowfactor,
-                "total tardiness": total_tardiness}
+                "total weighted tardiness": twt}
 
     def _calc_tardiness(self, schedule):
         """ Calculates the maximum timespan a job in schedule is too late.
@@ -186,14 +186,15 @@ class JspEvaluator:
             if job_ready.get(op_id[0], 0.0) < schedule[op_id][1]:
                 job_ready[op_id[0]] = schedule[op_id][1]
 
-        total_tardiness = 0.0
+        twt = 0.0
         for jobnum in job_ready:
             t_ready = job_ready[jobnum]
             deadline = self.model.job[jobnum].deadline
+            weight = self.model.job[jobnum].weight
             if t_ready > deadline:
-                total_tardiness += t_ready - deadline
+                twt += (t_ready - deadline) * weight
 
-        return total_tardiness
+        return twt
 
     def _calc_loadbalance(self, assignment, makespan):
         """ Calculated the load balance for the machines in assignment.

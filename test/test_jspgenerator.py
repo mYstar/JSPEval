@@ -18,7 +18,7 @@ def example_xml(request):
 
 # ---- tests ----
 def test_all_parameters_are_read(example_xml):
-    assert len(example_xml.keys()) == 9
+    assert len(example_xml.keys()) == 10
 
 
 @pytest.mark.parametrize("filename", [
@@ -51,7 +51,9 @@ def test_validates_correctly(example_xml):
     pytest.mark.xfail(raises=ValueError)
     ("test/yaml/wrong_release.yaml"),
     pytest.mark.xfail(raises=ValueError)
-    ("test/yaml/wrong_setup.yaml")
+    ("test/yaml/wrong_setup.yaml"),
+    pytest.mark.xfail(raises=ValueError)
+    ("test/yaml/wrong_weight.yaml")
 ])
 def test_invalidates_wrong_parameters(filename):
     _, param = jspgenerator.read_yaml(filename)
@@ -84,6 +86,8 @@ def test_model_is_generated_correctly(example_xml):
 
             assert float(o_job.deadline.text) >= 1.5 * joblen
             assert float(o_job.deadline.text) <= 2.0 * joblen
+            assert float(o_job.weight.text) >= 0.5
+            assert float(o_job.weight.text) <= 2.0
             assert int(o_job.lotsize.text) >= 1
             assert int(o_job.lotsize.text) <= 10
 
@@ -115,9 +119,13 @@ def test_convert_peres_fileformat():
     assert int(o_root.job[1].deadline) == 15
     assert int(o_root.job[2].deadline) == 20
 
+    assert int(o_root.job[0].weight) == 1.0
+    assert int(o_root.job[1].weight) == 2.0
+    assert int(o_root.job[2].weight) == 3.0
+
     assert int(o_root.job[0].lotsize) == 1
-    assert int(o_root.job[1].lotsize) == 2
-    assert int(o_root.job[2].lotsize) == 3
+    assert int(o_root.job[1].lotsize) == 1
+    assert int(o_root.job[2].lotsize) == 1
 
     assert len(o_root.job[0].operation) == 3
     assert len(o_root.job[1].operation) == 3

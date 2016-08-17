@@ -273,7 +273,7 @@ def test_calculate_metrics_example_simple_solution(evaluator, simple_solution):
     assert metrics["setup time"] == 0.0
     assert metrics["max wip"] == 1
     assert isclose(metrics["avg flowfactor"], 1.0)
-    assert metrics["total tardiness"] == 35.0
+    assert metrics["total weighted tardiness"] == 35.0
     assert isclose(
         metrics["load balance"],
         0.039283710065919297)
@@ -290,7 +290,7 @@ def test_calculate_metrics_example_special_solution(evaluator):
     assert metrics["setup time"] == 2.5
     assert metrics["max wip"] == 2
     assert isclose(metrics["avg flowfactor"], 1.9375)
-    assert metrics["total tardiness"] == 32.5
+    assert metrics["total weighted tardiness"] == 32.5
     assert isclose(
         metrics["load balance"],
         0.21690767459559079)
@@ -309,7 +309,7 @@ def test_calculate_metrics_10operations_simple_solution(
     assert metrics["setup time"] == 0.0
     assert metrics["max wip"] == 6
     assert isclose(metrics["avg flowfactor"], 1.0)
-    assert metrics["total tardiness"] == 0.0
+    assert metrics["total weighted tardiness"] == 0.0
     assert isclose(
         metrics["load balance"],
         0.13867504905630729)
@@ -331,7 +331,7 @@ def test_calculate_metrics_10operations_special_solution(
     assert isclose(metrics["avg flowfactor"],
                    1.55555556,
                    abs_tol=0.000001)
-    assert metrics["total tardiness"] == 115.0
+    assert metrics["total weighted tardiness"] == 111.25
     assert isclose(metrics["load balance"], 0.24622144504490259)
 
 
@@ -349,7 +349,7 @@ def test_calculate_metrics_complex_solution(
     assert metrics["setup time"] == 7.0
     assert metrics["max wip"] == 10
     assert isclose(metrics["avg flowfactor"], 1.3921553884711779)
-    assert metrics["total tardiness"] == 84.0
+    assert metrics["total weighted tardiness"] == 95.25
     assert isclose(metrics["load balance"], 0.15714880181131291)
 
 

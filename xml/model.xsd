@@ -6,8 +6,16 @@
 
   <!-- definition of simple datatypes -->
 
-  <!-- a deadline is defined as the number of timeunits since the start of the
-  production when the production of a job shall be ready -->
+  <!-- the weight of a job is a measurement of the importance of it. it is
+  closely associated with the cost the product causes, when it is not meeting
+  its deadline-->
+  <xs:simpleType name="t_weight">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0.0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- a deadline is defined as the number of timeunits since the start of the production when the production of a job shall be ready -->
   <xs:simpleType name="t_deadline">
     <xs:restriction base="xs:decimal">
       <xs:minInclusive value="0.0"/>
@@ -107,6 +115,7 @@
       <xs:sequence>
         <xs:element name="starttime" type="t_starttime"/>
         <xs:element name="deadline" type="t_deadline"/>
+        <xs:element name="weight" type="t_weight"/>
         <xs:element name="lotsize" type="t_lotsize"/>
         <xs:element ref="operation" maxOccurs="unbounded"/>
       </xs:sequence>
