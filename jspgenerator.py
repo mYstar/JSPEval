@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """Used to generate a valid xml-file to use in the JspEvaluator
 """
 import sys
@@ -54,7 +55,7 @@ def read_peres(filename):
     try:
         values = []
         for line in open(filename, "r"):
-            values.append(line.split(' ')[:-1])
+            values.append(line.split(' '))
 
         return values
     except IOError:
@@ -336,7 +337,7 @@ def process_yaml(files, output_dir, seed, compression):
         # write the result
         out_filename = "{}/{}.xml".format(
             output_dir,
-            param_file.split('.')[0].split('/')[-1])
+            param_file.split('/')[-1].split('.')[0])
 
         content = "{}\n<!--\nseed: {}\n{}\n-->\n{}".format(
             XML_HEADER,
@@ -365,6 +366,7 @@ def convert_peres(files, output_dir, compression):
     """
     # iterate over all peres files
     for peres_file in files:
+        print("converting: {}".format(peres_file))
         # get the values
         values = read_peres(peres_file)
 
@@ -374,7 +376,7 @@ def convert_peres(files, output_dir, compression):
         # write the result
         out_filename = "{}/{}.xml".format(
             output_dir,
-            peres_file.split('.')[0].split('/')[-1])
+            peres_file.split('/')[-1].split('.')[0])
 
         content = "{}\n{}".format(
             XML_HEADER,
@@ -397,15 +399,14 @@ def main():
 
     """
     usage_string = \
-        "usage: python3 jspgenerator.py-[hdsocf] <parameters.yaml, ...>"
+        "usage: python3 jspgenerator.py -[hsocf] <parameters.yaml, ...>"
 
     # read the given parameters
     try:
         options, files = getopt.getopt(
             sys.argv[1:],
-            "hdcs:o:f:",
-            ["help", "compression", "use-directories",
-             "seed=", "output-dir=", "format="])
+            "hcs:o:f:",
+            ["help", "compression", "seed=", "output-dir=", "format="])
     except getopt.GetoptError:
         print(usage_string)
         sys.exit(1)
@@ -414,10 +415,7 @@ def main():
     seed = random.randint(4294967295)
 
     # set the source dir as the output dir
-    if ('-d', '') in options:
-        output_dir = files[0]
-    else:
-        output_dir = os.path.dirname(files[0])
+    output_dir = os.path.dirname(files[0])
 
     # compression flag
     compression = False
@@ -429,8 +427,6 @@ def main():
         if opt in ("-h", "--help"):
             print(usage_string)
             sys.exit()
-        elif opt in ("-d", "--use-directory"):
-            files = get_yaml_files(files[0])
         elif opt in ("-s", "--seed"):
             seed = numpy.uint32(arg)
         elif opt in ("-o", "--output-dir"):
@@ -440,6 +436,8 @@ def main():
         elif opt in ("-f", "--format"):
             if arg == "peres":
                 fmt = arg
+
+    print("saving to: {}".format(output_dir))
 
     if fmt == "peres":
         convert_peres(files, output_dir, compression)
