@@ -75,3 +75,23 @@ metrics = evaluator.get_metrics(assign, sched)
 ```
 
 After this the `metrics` variable contains a dictionary, that has an entry with the name of every metric currently implemented and the corresponding value assigned to it.
+
+# JSPGenerator
+
+This is a little script used to generate jsp models from config parameter files written in yaml. ([example](yaml/example.yaml)) It can be used as:
+
+```shell
+./jspgenerator.py -o output/ yaml/example.yaml
+```
+
+Also, there is a way to convert Peres et. al. formatted files to the xml-format, like this.
+
+```shell
+./jspgenerator.py -f peres -o output/ data/JSP_instances/Taillard/tai01.txt 
+```
+
+For more information, please refer to the man-page via:
+
+```shell
+man ./jspgenerator.1
+```

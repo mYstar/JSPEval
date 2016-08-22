@@ -1,0 +1,39 @@
+.TH "JSP Generator" 1 2016-08-22 Git "Usage Manual"
+
+.SH NAME 
+jspgenerator.py \- a job shop problem generator
+
+.SH SYNOPSIS
+.B ./jspgen.py [-hc] [ -s 
+.I seed 
+.B ] [ -o 
+.I output-dir 
+.B ] [ -f 
+.I format 
+.B ] 
+.I file 
+.B ...
+
+.SH DESCRIPTION
+.B jspgenerator 
+generates job shop problems from .yaml files and can convert files in peres et. al. format into the xml format described in 
+.I xml/model.xsd.
+The .yaml files must contain the parameters for the random generation of the models. An example is provided in 
+.I yaml/example.yaml.
+A seed for the generation can be specified and the results can be written in a compressed gzip-format.
+
+.SH OPTIONS
+.IP "-c --compression"
+Use gzip compression to write the output files.
+.IP "-f yaml|peres --format=yaml|peres"
+Use the yaml format to generate a model or convert a model from the peres et. al. format. (Default: yaml)
+.IP "-h --help"
+Display a short helpstring how to use the script.
+.IP "-o DIR --output-dir=DIR"
+Write the files specifically to the directory DIR. (Default: source directory of the files)
+.IP "-s number --s number"
+Use the seed number for the random generation. Use this to regenerate models easily.
+.SH AUTHOR
+Eric Starke <eric dot starke at htw-dresden.de>
+.SH "SEE ALSO"
+.I https://github.com/mYstar/JSPEval
