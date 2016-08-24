@@ -2,11 +2,14 @@
 and shares utility functions to the outside. Also shares the objectified view
 on the xml model.
 """
+import sys
+import os.path
 import gzip
+import numpy
 from lxml import etree
 from lxml import objectify
+sys.path.append(os.path.dirname(__file__))
 from jspsolution import JspSolution
-import numpy
 
 
 class JspModel:
@@ -22,7 +25,8 @@ class JspModel:
         datastructures.
         """
         # read the xml schema and build a parser from it
-        schema = etree.XMLSchema(file=open("xml/model.xsd", "r"))
+        schemafile = "{}/xml/model.xsd".format(os.path.dirname(__file__))
+        schema = etree.XMLSchema(file=open(schemafile, "r"))
         parser = objectify.makeparser(schema=schema)
 
         # read the model and build objects from it
