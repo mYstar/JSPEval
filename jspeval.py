@@ -135,17 +135,17 @@ class JspEvaluator:
         Calculates the following metrics:
             - makespan
             - total weighted tardiness
+            - flowfactor
             - load balance
             - setup time
             - max wip
-            - max passtime
 
         @param assignment:     the machine assignment for the operations
         @type assignment: dict
         @param schedule:       The calculated schedule for a solution.
         @type schedule: dict
 
-        @return:        a dictionary with the metric names as keys.
+        @return:        a tuple with the metric values in the above order.
         @rtype: dict
         """
         # search for the last readytime
@@ -163,12 +163,7 @@ class JspEvaluator:
         # calculate the WIP and flowfactor
         wip, flowfactor = self._calc_wip_and_flow(schedule)
 
-        return {"makespan": makespan,
-                "setup time": setuptime,
-                "load balance": loadbalance,
-                "max wip": wip,
-                "avg flowfactor": flowfactor,
-                "total weighted tardiness": twt}
+        return (makespan, twt, flowfactor, setuptime, loadbalance, wip)
 
     def _calc_tardiness(self, schedule):
         """ Calculates the maximum timespan a job in schedule is too late.

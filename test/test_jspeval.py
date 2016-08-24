@@ -269,14 +269,12 @@ def test_calculate_metrics_example_simple_solution(evaluator, simple_solution):
     assignment = evaluator.build_machine_assignment(simple_solution)
     schedule = evaluator.execute_schedule(assignment)
     metrics = evaluator.get_metrics(assignment, schedule)
-    assert metrics["makespan"] == 60.0
-    assert metrics["setup time"] == 0.0
-    assert metrics["max wip"] == 1
-    assert isclose(metrics["avg flowfactor"], 1.0)
-    assert metrics["total weighted tardiness"] == 35.0
-    assert isclose(
-        metrics["load balance"],
-        0.039283710065919297)
+    assert metrics[0] == 60.0
+    assert metrics[1] == 35.0
+    assert isclose(metrics[2], 1.0)
+    assert metrics[3] == 0.0
+    assert isclose(metrics[4], 0.039283710065919297)
+    assert metrics[5] == 1
 
 
 def test_calculate_metrics_example_special_solution(evaluator):
@@ -286,14 +284,12 @@ def test_calculate_metrics_example_special_solution(evaluator):
     assignment = evaluator.build_machine_assignment(special_sol)
     schedule = evaluator.execute_schedule(assignment)
     metrics = evaluator.get_metrics(assignment, schedule)
-    assert metrics["makespan"] == 57.5
-    assert metrics["setup time"] == 2.5
-    assert metrics["max wip"] == 2
-    assert isclose(metrics["avg flowfactor"], 1.9375)
-    assert metrics["total weighted tardiness"] == 32.5
-    assert isclose(
-        metrics["load balance"],
-        0.21690767459559079)
+    assert metrics[0] == 57.5
+    assert metrics[1] == 32.5
+    assert isclose(metrics[2], 1.9375)
+    assert metrics[3] == 2.5
+    assert isclose(metrics[4], 0.21690767459559079)
+    assert metrics[5] == 2
 
 
 def test_calculate_metrics_10operations_simple_solution(
@@ -305,14 +301,12 @@ def test_calculate_metrics_10operations_simple_solution(
         simple_solution_10operations)
     schedule = evaluator.execute_schedule(assignment)
     metrics = evaluator.get_metrics(assignment, schedule)
-    assert metrics["makespan"] == 65.0
-    assert metrics["setup time"] == 0.0
-    assert metrics["max wip"] == 6
-    assert isclose(metrics["avg flowfactor"], 1.0)
-    assert metrics["total weighted tardiness"] == 0.0
-    assert isclose(
-        metrics["load balance"],
-        0.13867504905630729)
+    assert metrics[0] == 65.0
+    assert metrics[1] == 0.0
+    assert isclose(metrics[2], 1.0)
+    assert metrics[3] == 0.0
+    assert isclose(metrics[4], 0.13867504905630729)
+    assert metrics[5] == 6
 
 
 def test_calculate_metrics_10operations_special_solution(
@@ -325,14 +319,12 @@ def test_calculate_metrics_10operations_special_solution(
     assignment = evaluator.build_machine_assignment(solution)
     schedule = evaluator.execute_schedule(assignment)
     metrics = evaluator.get_metrics(assignment, schedule)
-    assert metrics["makespan"] == 100.0
-    assert metrics["setup time"] == 0.0
-    assert metrics["max wip"] == 5
-    assert isclose(metrics["avg flowfactor"],
-                   1.55555556,
-                   abs_tol=0.000001)
-    assert metrics["total weighted tardiness"] == 111.25
-    assert isclose(metrics["load balance"], 0.24622144504490259)
+    assert metrics[0] == 100.0
+    assert metrics[1] == 111.25
+    assert isclose(metrics[2], 1.55555556, abs_tol=0.000001)
+    assert metrics[3] == 0.0
+    assert isclose(metrics[4], 0.24622144504490259)
+    assert metrics[5] == 5
 
 
 def test_calculate_metrics_complex_solution(
@@ -345,12 +337,12 @@ def test_calculate_metrics_complex_solution(
     assignment = evaluator.build_machine_assignment(solution)
     schedule = evaluator.execute_schedule(assignment)
     metrics = evaluator.get_metrics(assignment, schedule)
-    assert metrics["makespan"] == 126.5
-    assert metrics["setup time"] == 7.0
-    assert metrics["max wip"] == 10
-    assert isclose(metrics["avg flowfactor"], 1.3921553884711779)
-    assert metrics["total weighted tardiness"] == 95.25
-    assert isclose(metrics["load balance"], 0.15714880181131291)
+    assert metrics[0] == 126.5
+    assert metrics[1] == 95.25
+    assert isclose(metrics[2], 1.3921553884711779)
+    assert metrics[3] == 7.0
+    assert isclose(metrics[4], 0.15714880181131291)
+    assert metrics[5] == 10
 
 
 def test_calculate_partial_setuptime():
