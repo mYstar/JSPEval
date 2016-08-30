@@ -19,7 +19,7 @@ setuptimes: [0.0, 5.0]
   <machine machine_id="m3"/>
   <machine machine_id="m4"/>
   <job job_id="j0">
-    <starttime>2.98</starttime>
+    <releasetime>2.98</releasetime>
     <deadline>114.60</deadline>
     <lotsize>8</lotsize>
     <operation operation_id="j0_o0">
@@ -47,7 +47,7 @@ setuptimes: [0.0, 5.0]
     </operation>
   </job>
   <job job_id="j1">
-    <starttime>26.65</starttime>
+    <releasetime>26.65</releasetime>
     <deadline>98.79</deadline>
     <lotsize>5</lotsize>
     <operation operation_id="j1_o0">
@@ -78,7 +78,7 @@ setuptimes: [0.0, 5.0]
     </operation>
   </job>
   <job job_id="j2">
-    <starttime>30.19</starttime>
+    <releasetime>30.19</releasetime>
     <deadline>134.99</deadline>
     <lotsize>10</lotsize>
     <operation operation_id="j2_o0">
@@ -101,7 +101,7 @@ setuptimes: [0.0, 5.0]
     </operation>
   </job>
   <job job_id="j3">
-    <starttime>13.33</starttime>
+    <releasetime>13.33</releasetime>
     <deadline>74.52</deadline>
     <lotsize>10</lotsize>
     <operation operation_id="j3_o0">

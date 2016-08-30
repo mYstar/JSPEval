@@ -90,13 +90,13 @@ class JspEvaluator:
             operation = job.operation[op_index[1]]
             machine = avail_op[op_index][0]
 
-            # the first operation's starttime is the job's starttime
+            # the first operation's releasetime is the job's releasetime
             if op_index[1] == 0:
-                starttime = job.starttime
+                releasetime = job.releasetime
             else:
                 # all other operations can start when their predecessors
                 # are done
-                starttime = \
+                releasetime = \
                     schedule[(op_index[0], op_index[1]-1)][1]
 
             # calculate the setuptime
@@ -105,13 +105,13 @@ class JspEvaluator:
                 op_index)
 
             # calculate the time the operation is finished
-            if machinetime[machine] + setuptime > starttime:
+            if machinetime[machine] + setuptime > releasetime:
                 start = machinetime[machine] + setuptime
                 # calculate partial setuptimes if necessary
-                if starttime > machinetime[machine]:
-                    setuptime -= starttime - machinetime[machine]
+                if releasetime > machinetime[machine]:
+                    setuptime -= releasetime - machinetime[machine]
             else:
-                start = starttime
+                start = releasetime
                 # readjust hidden setuptime (done in idle time)
                 setuptime = 0.0
             finish_time = start + operation.op_duration

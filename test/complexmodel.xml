@@ -12,11 +12,11 @@
   <machine machine_id="m3"/>
 
   <!-- listing of all jobs and their operations. All times are relative to the
-  model start. starttime is the earliest time the job can begin processing.
+  model start. releasetime is the earliest time the job can begin processing.
   deadline is the planned time when the job shall be ready operations have a
   duration and a list of allowed machines for processing -->
   <job job_id="j0">
-    <starttime>0.0</starttime>
+    <releasetime>0.0</releasetime>
     <deadline>30.0</deadline>
     <weight>1.5</weight>
     <lotsize>2</lotsize>
@@ -33,7 +33,7 @@
   </job>
   
   <job job_id="j1">
-    <starttime>15.0</starttime>
+    <releasetime>15.0</releasetime>
     <deadline>150.0</deadline>
     <weight>1.0</weight>
     <lotsize>1</lotsize>
@@ -69,7 +69,7 @@
   </job>
 
   <job job_id="j2">
-    <starttime>30.0</starttime>
+    <releasetime>30.0</releasetime>
     <deadline>100.0</deadline>
     <weight>2.0</weight>
     <lotsize>5</lotsize>
@@ -93,7 +93,7 @@
   </job>
 
   <job job_id="j3">
-    <starttime>50.0</starttime>
+    <releasetime>50.0</releasetime>
     <deadline>65.0</deadline>
     <weight>1.0</weight>
     <lotsize>4</lotsize>
@@ -107,7 +107,7 @@
   </job>
 
   <job job_id="j4">
-    <starttime>5.0</starttime>
+    <releasetime>5.0</releasetime>
     <deadline>80.0</deadline>
     <weight>0.5</weight>
     <lotsize>2</lotsize>

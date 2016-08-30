@@ -178,8 +178,8 @@ def generate_peres_xmltree(params):
         jname = "j{}".format(jnum)
         e_job = etree.SubElement(root, "job", job_id=jname)
 
-        # starttime element
-        etree.SubElement(e_job, "starttime").text = params[jnum + 1][0]
+        # releasetime element
+        etree.SubElement(e_job, "releasetime").text = params[jnum + 1][0]
         # create deadline element
         etree.SubElement(e_job, "deadline").text = params[jnum + 1][1]
         # generate the weight
@@ -225,8 +225,8 @@ def generate_jobs(root, params, machines):
         jname = "j{}".format(jnum)
         e_job = etree.SubElement(root, "job", job_id=jname)
 
-        # starttime element
-        etree.SubElement(e_job, "starttime")
+        # releasetime element
+        etree.SubElement(e_job, "releasetime")
         # create deadline element
         e_deadl = etree.SubElement(e_job, "deadline")
         # generate the weight
@@ -251,8 +251,8 @@ def generate_jobs(root, params, machines):
     # generate the starting times
     max_jobduration = max(joblengths.values())
     for e_job in root.iter("job"):
-        starttime = random.rand() * params["release_time"] * max_jobduration
-        e_job.find('starttime').text = "{:.2f}".format(starttime)
+        releasetime = random.rand() * params["release_time"] * max_jobduration
+        e_job.find('releasetime').text = "{:.2f}".format(releasetime)
 
     return root
 

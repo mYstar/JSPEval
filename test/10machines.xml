@@ -18,11 +18,11 @@
   <machine machine_id="113"/>
 
   <!-- listing of all jobs and their operations. All times are relative to the
-  model start. starttime is the earliest time the job can begin processing.
+  model start. releasetime is the earliest time the job can begin processing.
   deadline is the planned time when the job shall be ready operations have a
   duration and a list of allowed machines for processing -->
   <job job_id="j01">
-    <starttime>0.0</starttime>
+    <releasetime>0.0</releasetime>
     <deadline>25.0</deadline>
     <weight>1.0</weight>
     <lotsize>1</lotsize>

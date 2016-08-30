@@ -95,7 +95,7 @@ def test_model_is_generated_correctly(example_xml):
                 max_joblen = joblen
 
         for o_job in o_root.job:
-            assert float(o_job.starttime.text) <= 0.5 * max_joblen
+            assert float(o_job.releasetime.text) <= 0.5 * max_joblen
 
         assert len(o_root.setuptimes.setuptime) == jobcount * jobcount
 
@@ -111,9 +111,9 @@ def test_convert_peres_fileformat():
     assert not hasattr(o_root.setuptimes, 'setuptime')
 
     # check the jobs
-    assert int(o_root.job[0].starttime) == 0
-    assert int(o_root.job[1].starttime) == 5
-    assert int(o_root.job[2].starttime) == 10
+    assert int(o_root.job[0].releasetime) == 0
+    assert int(o_root.job[1].releasetime) == 5
+    assert int(o_root.job[2].releasetime) == 10
 
     assert int(o_root.job[0].deadline) == 10
     assert int(o_root.job[1].deadline) == 15

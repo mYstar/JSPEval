@@ -31,9 +31,9 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- a starttime is defined as the number of timeunits since the start of the
+  <!-- a releasetime is defined as the number of timeunits since the start of the
   production when the job can start processing-->
-  <xs:simpleType name="t_starttime">
+  <xs:simpleType name="t_releasetime">
     <xs:restriction base="xs:decimal">
       <xs:minInclusive value="0.0"/>
     </xs:restriction>
@@ -113,7 +113,7 @@
 
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="starttime" type="t_starttime"/>
+        <xs:element name="releasetime" type="t_releasetime"/>
         <xs:element name="deadline" type="t_deadline"/>
         <xs:element name="weight" type="t_weight"/>
         <xs:element name="lotsize" type="t_lotsize"/>
