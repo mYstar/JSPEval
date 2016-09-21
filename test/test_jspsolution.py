@@ -1,6 +1,7 @@
 """ Tests for the JspSolution class.
 """
 import pytest
+import numpy as np
 from jspsolution import JspSolution
 from test.conftest import isclose
 
@@ -14,7 +15,9 @@ from test.conftest import isclose
 ])
 def test_determine_machine(model, index, expected):
     solution = JspSolution(model, [0.1, 0.4, 0.9, 0.2])
+    np_solution = JspSolution(model, np.array([0.1, 0.4, 0.9, 0.2]))
     assert solution.get_machine_assignment(int(index)) == expected
+    assert np_solution.get_machine_assignment(int(index)) == expected
 
 
 @pytest.mark.parametrize("value,expected", [
@@ -31,9 +34,13 @@ def test_determine_machine(model, index, expected):
 ])
 def test_determine_10machine(model_10machines, value, expected):
     solution = JspSolution(model_10machines, [value])
+    np_solution = JspSolution(model_10machines, np.array([value]))
     assert solution.get_machine_assignment(0) == expected
+    assert np_solution.get_machine_assignment(0) == expected
     with pytest.raises(IndexError):
         solution.get_machine_assignment(1)
+    with pytest.raises(IndexError):
+        np_solution.get_machine_assignment(1)
 
 
 @pytest.mark.parametrize("index,expected", [
@@ -44,7 +51,9 @@ def test_determine_10machine(model_10machines, value, expected):
 ])
 def test_prioritiy(model, index, expected):
     solution = JspSolution(model, [0.03, 0.33, 0.61, 0.98])
+    np_solution = JspSolution(model, np.array([0.03, 0.33, 0.61, 0.98]))
     assert isclose(solution.get_priority(index), expected)
+    assert isclose(np_solution.get_priority(index), expected)
 
 
 @pytest.mark.parametrize("value,expected", [
@@ -64,10 +73,10 @@ def test_priority_10machine(
         value,
         expected
 ):
-    solution = JspSolution(
-        model_10machines,
-        [value])
+    solution = JspSolution(model_10machines, [value])
+    np_solution = JspSolution(model_10machines, np.array([value]))
     assert isclose(solution.get_priority(0), expected)
+    assert isclose(np_solution.get_priority(0), expected)
 
 
 @pytest.mark.xfail(raises=ValueError)
@@ -78,3 +87,13 @@ def test_do_not_allow_negative_allel(model):
 @pytest.mark.xfail(raises=ValueError)
 def test_do_not_allow_allel_over_1(model):
     JspSolution(model, [1.03, 0.33, 0.61, 0.98])
+
+
+@pytest.mark.xfail(raises=ValueError)
+def test_do_not_allow_negative_allel_np(model):
+    JspSolution(model, np.array([-0.03, 0.33, 0.61, 0.98]))
+
+
+@pytest.mark.xfail(raises=ValueError)
+def test_do_not_allow_allel_over_1_np(model):
+    JspSolution(model, np.array([1.03, 0.33, 0.61, 0.98]))
