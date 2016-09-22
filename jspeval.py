@@ -163,7 +163,7 @@ class JspEvaluator:
         # calculate the WIP and flowfactor
         wip, flowfactor = self._calc_wip_and_flow(schedule)
 
-        return (makespan, twt, flowfactor, setuptime, loadbalance, wip)
+        return [makespan, twt, flowfactor, setuptime, loadbalance, wip]
 
     def _calc_tardiness(self, schedule):
         """ Calculates the maximum timespan a job in schedule is too late.

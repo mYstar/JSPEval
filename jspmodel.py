@@ -47,7 +47,8 @@ class JspModel:
         """
         Forwards the getter to a ObjectifiedObject of the model.
         """
-        return getattr(self.model, name)
+        mdl = object.__getattribute__(self, 'model')
+        return getattr(mdl, name)
 
     def _create_allowed_machines_list(self):
         """
