@@ -10,7 +10,9 @@ from jspmodel import JspModel
 
 def test_machine_assignment_everything_assigned(evaluator, rand_solution):
     assignment = evaluator.build_machine_assignment(rand_solution)
-    np_solution = JspSolution(evaluator.model, np.array(rand_solution.values))
+    np_solution = JspSolution(
+        evaluator.model,
+        np.array(rand_solution.get_values()))
     np_assignment = evaluator.build_machine_assignment(np_solution)
 
     # have values for every operation
@@ -46,7 +48,7 @@ def test_machine_assignment_model_simple_solution(
     assignment = evaluator.build_machine_assignment(simple_solution)
     np_solution = JspSolution(
         evaluator.model,
-        np.array(simple_solution.values))
+        np.array(simple_solution.get_values()))
     np_assignment = evaluator.build_machine_assignment(np_solution)
 
     assert assignment[operation] == expected
@@ -74,7 +76,7 @@ def test_machine_assignment_model10operations_simple_solution(
     evaluator = JspEvaluator(model_10operations)
     np_solution = JspSolution(
         model_10operations,
-        np.array(simple_solution_10operations.values))
+        np.array(simple_solution_10operations.get_values()))
 
     assignment = evaluator.build_machine_assignment(
         simple_solution_10operations)
@@ -206,7 +208,7 @@ def test_execute_schedule_right_output_len(evaluator, simple_solution):
     assignment = evaluator.build_machine_assignment(simple_solution)
     np_solution = JspSolution(
             evaluator.model,
-            simple_solution.values)
+            simple_solution.get_values())
     np_assignment = evaluator.build_machine_assignment(np_solution)
 
     schedule = evaluator.execute_schedule(assignment)
@@ -233,7 +235,7 @@ def test_execute_schedule_simple_solution(
     assignment = evaluator.build_machine_assignment(simple_solution)
     np_solution = JspSolution(
             evaluator.model,
-            simple_solution.values)
+            simple_solution.get_values())
     np_assignment = evaluator.build_machine_assignment(np_solution)
 
     schedule = evaluator.execute_schedule(assignment)
@@ -289,7 +291,7 @@ def test_execute_schedule_simple_solution_10_operations(
     evaluator = JspEvaluator(model_10operations)
     np_solution = JspSolution(
             model_10operations,
-            np.array(simple_solution_10operations.values))
+            np.array(simple_solution_10operations.get_values()))
 
     assignment = evaluator.build_machine_assignment(
         simple_solution_10operations)
@@ -379,7 +381,7 @@ def test_execute_schedule_special_solution_complex(
 def test_calculate_metrics_example_simple_solution(evaluator, simple_solution):
     np_solution = JspSolution(
         evaluator.model,
-        np.array(simple_solution.values))
+        np.array(simple_solution.get_values()))
 
     assignment = evaluator.build_machine_assignment(simple_solution)
     np_assignment = evaluator.build_machine_assignment(np_solution)
@@ -445,7 +447,7 @@ def test_calculate_metrics_10operations_simple_solution(
     evaluator = JspEvaluator(model_10operations)
     np_solution = JspSolution(
         evaluator.model,
-        np.array(simple_solution_10operations.values))
+        np.array(simple_solution_10operations.get_values()))
 
     assignment = evaluator.build_machine_assignment(
         simple_solution_10operations)

@@ -25,6 +25,12 @@ class JspEvaluator:
         """
         self.model = model
 
+    def metrics_count(self):
+        """Returns the number of metric values that will be returned by the
+           calculation.
+        """
+        return 6
+
     def build_machine_assignment(self, solution):
         """
         This function assigns operations to machines according to a solution
