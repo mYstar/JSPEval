@@ -19,29 +19,37 @@ class JspModel:
     setuptimes for the operations (get_setuptime()).
     """
 
-    def __init__(self, filename="xml/example.xml"):
+    def __init__(self, filename):
         """
         Takes the xml-File, that describes the model and builds all necessary
-        datastructures.
+        datastructures. When a JspModel is given this acts as a copy
+        constructor.
         """
-        # read the xml schema and build a parser from it
-        schemafile = "{}/xml/model.xsd".format(os.path.dirname(__file__))
-        schema = etree.XMLSchema(file=open(schemafile, "r"))
-        parser = objectify.makeparser(schema=schema)
-
-        # read the model and build objects from it
-        if filename.endswith(".gz"):
-            modelfile = gzip.open(filename, 'r')
+        if isinstance(filename, JspModel):
+            self.model = filename.model
+            self.index_translation_list = filename.index_translation_list
+            self.allowed_machines = filename.allowed_machines
+            self.setuptimes = filename.setuptimes
         else:
-            modelfile = open(filename, 'r')
+            # read the xml schema and build a parser from it
+            schemafile = "{}/xml/model.xsd".format(os.path.dirname(__file__))
+            schema = etree.XMLSchema(file=open(schemafile, "r"))
+            parser = objectify.makeparser(schema=schema)
 
-        self.model = objectify.parse(modelfile, parser).getroot()
-        # prebuild the index translation list
-        self.index_translation_list = self._create_index_translation_list()
-        # provide a translated list of the allowed machines for every operation
-        self.allowed_machines = self._create_allowed_machines_list()
-        # create a setupmatrix between all operations (indexed globally)
-        self.setuptimes = self._create_setuptimes()
+            # read the model and build objects from it
+            if filename.endswith(".gz"):
+                modelfile = gzip.open(filename, 'r')
+            else:
+                modelfile = open(filename, 'r')
+
+            self.model = objectify.parse(modelfile, parser).getroot()
+            # prebuild the index translation list
+            self.index_translation_list = self._create_index_translation_list()
+            # provide a translated list of the allowed machines for every
+            # operation
+            self.allowed_machines = self._create_allowed_machines_list()
+            # create a setupmatrix between all operations (indexed globally)
+            self.setuptimes = self._create_setuptimes()
 
     def __getattr__(self, name):
         """
@@ -186,6 +194,15 @@ class JspModel:
 
         """
         return not _xmleq(self.model, other.model)
+
+    def __deepcopy__(self, memo):
+        """Custom deepcopy because of __getattr__().
+
+        :memo: a memo of copied objects (not used here)
+        :returns: a copy of the model and all members.
+
+        """
+        return JspModel(self)
 
 
 def _xmleq(elem1, elem2):
