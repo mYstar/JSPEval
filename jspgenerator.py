@@ -376,7 +376,7 @@ def convert_peres(files, output_dir, compression):
         # write the result
         out_filename = "{}/{}.xml".format(
             output_dir,
-            peres_file.split('/')[-1].split('.')[0])
+            os.path.splitext(peres_file.split('/')[-1])[0])
 
         content = "{}\n{}".format(
             XML_HEADER,

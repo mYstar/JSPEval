@@ -4,7 +4,7 @@ access the priority and machine assignment for every operation.
 import math
 
 
-class JspSolution:
+class JspSolution(object):
     """
     This class represents a solution for a JSP Model and provides functions to
     extract the machine assignment and the priority.

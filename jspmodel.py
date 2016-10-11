@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(__file__))
 from jspsolution import JspSolution
 
 
-class JspModel:
+class JspModel(object):
     """ Reads all model information from a xml file. Provides solution
     length detection (solution_length()), creation of random solutions
     (get_random_solution()), index translation (translate_global_index()) and
