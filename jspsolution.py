@@ -57,8 +57,8 @@ class JspSolution(object):
         """
         if self.machine_assignment is None:
             self.machine_assignment =\
-                [self._determine_machine_index(index)
-                 for index, _ in enumerate(self._values)]
+                [self._determine_machine_index(idx)
+                 for idx, _ in enumerate(self._values)]
 
         return self.machine_assignment[index]
 
@@ -75,8 +75,8 @@ class JspSolution(object):
         """
         if self.priorities is None:
             self.priorities =\
-                [self._determine_priority(index)
-                 for index, _ in enumerate(self._values)]
+                [self._determine_priority(idx)
+                 for idx, _ in enumerate(self._values)]
 
         return self.priorities[index]
 
